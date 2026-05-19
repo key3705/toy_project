@@ -5,27 +5,28 @@ import numpy as np
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
-# ---------------------------------------------------
+# =========================================================
 # 페이지 설정
-# ---------------------------------------------------
+# =========================================================
 st.set_page_config(
-    page_title="Y2K Seller Assistant",
+    page_title="Seller Assistant",
     layout="wide"
 )
 
-# ---------------------------------------------------
+# =========================================================
 # Y2K CSS
-# ---------------------------------------------------
+# =========================================================
 st.markdown("""
 <style>
 
 /* 전체 */
 .stApp {
-    background-color: #F5F3FF;
+    background-color: #F6F4FF;
     color: #4A4A68;
+    font-family: 'Trebuchet MS', sans-serif;
 }
 
-/* 메인 여백 */
+/* 메인 */
 .block-container {
     padding-top: 2rem;
     padding-left: 3rem;
@@ -35,40 +36,40 @@ st.markdown("""
 /* 사이드바 */
 section[data-testid="stSidebar"] {
     background-color: #DCD6FF;
-    border-right: 4px solid #B8B2FF;
+    border-right: 4px solid #B7B0FF;
 }
 
-/* 사이드바 전체 글씨 */
+/* 사이드바 글씨 */
 section[data-testid="stSidebar"] * {
     color: #4A4A68 !important;
 }
 
 /* 제목 */
 h1 {
-    color: #6B66FF;
-    font-size: 3.2rem;
+    color: #625CD6;
+    font-size: 3.4rem;
     font-weight: 800;
 }
 
 /* 소제목 */
 h2, h3 {
-    color: #7269D8;
+    color: #7268D8;
 }
 
 /* 카드 */
 div[data-testid="metric-container"] {
     background-color: white;
-    border-radius: 25px;
+    border-radius: 24px;
     padding: 18px;
-    border: 3px solid #C9C3FF;
-    box-shadow: 4px 4px 14px rgba(0,0,0,0.08);
+    border: 3px solid #C7C2FF;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.08);
 }
 
 /* 입력창 */
 .stTextInput input {
     background-color: white !important;
     border-radius: 20px !important;
-    border: 3px solid #B8B2FF !important;
+    border: 3px solid #B7B0FF !important;
     color: #4A4A68 !important;
     font-size: 18px !important;
 }
@@ -83,18 +84,29 @@ div[data-testid="metric-container"] {
 .stSelectbox div[data-baseweb="select"] {
     background-color: white !important;
     border-radius: 18px !important;
-    border: 3px solid #B8B2FF !important;
+    border: 3px solid #B7B0FF !important;
 }
 
-/* dropdown 내부 */
+/* dropdown */
 div[role="listbox"] * {
     background-color: white !important;
     color: #4A4A68 !important;
 }
 
+/* 버튼 */
+.stButton button {
+    background-color: #9F98FF !important;
+    color: white !important;
+    border-radius: 20px !important;
+    border: none !important;
+    font-size: 18px !important;
+    font-weight: bold !important;
+    padding: 12px 20px !important;
+}
+
 /* slider */
 .stSlider {
-    color: #8C84FF !important;
+    color: #9F98FF !important;
 }
 
 /* dataframe */
@@ -103,49 +115,53 @@ div[role="listbox"] * {
     overflow: hidden;
 }
 
-/* 버튼 */
-.stButton button {
-    background-color: #A89EFF !important;
-    color: white !important;
-    border-radius: 20px !important;
-    border: none !important;
-    font-weight: bold !important;
-    font-size: 16px !important;
-}
-
 /* expander */
 .streamlit-expanderHeader {
     background-color: #ECE9FF;
     border-radius: 15px;
 }
 
-/* radio */
-.stRadio label {
-    font-size: 18px !important;
-    font-weight: 600 !important;
+/* info card */
+.info-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 25px;
+    border: 3px solid #C7C2FF;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+/* analysis card */
+.analysis-card {
+    background-color: white;
+    padding: 25px;
+    border-radius: 25px;
+    border: 3px solid #D8D3FF;
+    box-shadow: 4px 4px 12px rgba(0,0,0,0.08);
+    margin-top: 15px;
 }
 
 </style>
 """, unsafe_allow_html=True)
 
-# ---------------------------------------------------
+# =========================================================
 # 제목
-# ---------------------------------------------------
-st.title("🎮 Y2K Seller Assistant")
+# =========================================================
+st.title("🎮 Seller Assistant")
 
 st.markdown("""
-감성적인 AI 판매 전략 도우미 ✨  
-비슷한 상품들의 데이터를 분석하여 최적 할인 전략을 추천합니다.
+상품 데이터를 기반으로  
+판매 전략을 분석합니다.
 """)
 
-# ---------------------------------------------------
+# =========================================================
 # 데이터 로드
-# ---------------------------------------------------
+# =========================================================
 df = pd.read_csv("amazon.csv")
 
-# ---------------------------------------------------
+# =========================================================
 # 데이터 전처리
-# ---------------------------------------------------
+# =========================================================
 df = df.copy()
 
 df['discounted_price'] = (
@@ -183,17 +199,17 @@ for col in numeric_cols:
 
 df = df.dropna(subset=numeric_cols)
 
-# ---------------------------------------------------
+# =========================================================
 # 소비자 반응 점수
-# ---------------------------------------------------
+# =========================================================
 df['consumer_score'] = (
     df['rating'] *
     np.log1p(df['rating_count'])
 )
 
-# ---------------------------------------------------
+# =========================================================
 # 카테고리 정리
-# ---------------------------------------------------
+# =========================================================
 category_mapping = {
     "Computers&Accessories": "💻 Computer",
     "Electronics": "🎧 Electronics",
@@ -217,27 +233,27 @@ df['display_category'] = (
     .fillna("✨ Other")
 )
 
-# ---------------------------------------------------
+# =========================================================
 # 텍스트 결합
-# ---------------------------------------------------
+# =========================================================
 df['combined_text'] = (
     df['product_name'].fillna('') + ' ' +
     df['about_product'].fillna('') + ' ' +
     df['display_category'].fillna('')
 )
 
-# ---------------------------------------------------
+# =========================================================
 # TF-IDF
-# ---------------------------------------------------
+# =========================================================
 vectorizer = TfidfVectorizer(stop_words='english')
 
 tfidf_matrix = vectorizer.fit_transform(
     df['combined_text']
 )
 
-# ---------------------------------------------------
+# =========================================================
 # 사이드바
-# ---------------------------------------------------
+# =========================================================
 st.sidebar.header("🧸 상품 설정")
 
 product_type = st.sidebar.radio(
@@ -245,19 +261,19 @@ product_type = st.sidebar.radio(
     ["신상품", "현재 판매 중 상품"]
 )
 
-# ===================================================
+# =========================================================
 # 신상품
-# ===================================================
+# =========================================================
 if product_type == "신상품":
 
     st.sidebar.subheader("✨ 신상품 정보")
 
-    new_name = st.sidebar.text_input(
+    product_name = st.sidebar.text_input(
         "상품명",
         "Wireless Headset"
     )
 
-    new_keywords = st.sidebar.text_input(
+    product_keywords = st.sidebar.text_input(
         "설명 키워드",
         "bluetooth noise cancelling"
     )
@@ -268,12 +284,12 @@ if product_type == "신상품":
         .unique()
     )
 
-    new_category = st.sidebar.selectbox(
+    selected_category = st.sidebar.selectbox(
         "카테고리",
         category_list
     )
 
-    new_price = st.sidebar.number_input(
+    product_price = st.sidebar.number_input(
         "예상 판매 가격",
         min_value=0.0,
         value=5000.0
@@ -286,52 +302,9 @@ if product_type == "신상품":
         10
     )
 
-    # 사용자 입력 텍스트
-    user_text = (
-        new_name + ' ' +
-        new_keywords + ' ' +
-        new_category
-    )
-
-    # 유사도 계산
-    user_vector = vectorizer.transform(
-        [user_text]
-    )
-
-    similarity_scores = cosine_similarity(
-        user_vector,
-        tfidf_matrix
-    ).flatten()
-
-    df['similarity'] = similarity_scores
-
-    # 카테고리 필터
-    similar_products = df[
-        df['display_category'] == new_category
-    ]
-
-    # 가격 필터
-    price_min = new_price * 0.7
-    price_max = new_price * 1.3
-
-    similar_products = similar_products[
-        (similar_products['discounted_price'] >= price_min) &
-        (similar_products['discounted_price'] <= price_max)
-    ]
-
-    # 유사도 정렬
-    similar_products = similar_products.sort_values(
-        by='similarity',
-        ascending=False
-    )
-
-    top_products = similar_products.head(
-        similar_count
-    )
-
-# ===================================================
+# =========================================================
 # 판매 중 상품
-# ===================================================
+# =========================================================
 else:
 
     st.sidebar.subheader("🔥 추천 검색 품목")
@@ -390,149 +363,275 @@ else:
         search_result.iloc[selected_idx]
     )
 
-    product_category = (
+    product_name = (
+        selected_product['product_name']
+    )
+
+    selected_category = (
         selected_product['display_category']
     )
 
-    top_products = df[
-        df['display_category'] == product_category
-    ]
+    product_price = (
+        selected_product['discounted_price']
+    )
 
-# ---------------------------------------------------
-# 시장 분석
-# ---------------------------------------------------
-market_discount = (
-    top_products['discount_percentage']
-    .mean()
+    similar_count = st.sidebar.slider(
+        "유사 상품 고려 개수",
+        3,
+        20,
+        10
+    )
+
+# =========================================================
+# 분석 버튼
+# =========================================================
+analyze_button = st.sidebar.button(
+    "🎀 분석 시작"
 )
 
-market_rating = (
-    top_products['rating']
-    .mean()
-)
+# =========================================================
+# 분석 실행
+# =========================================================
+if analyze_button:
 
-market_review = (
-    top_products['rating_count']
-    .mean()
-)
+    with st.spinner("🎮 시장 데이터를 분석 중이에요..."):
 
-competition_level = len(top_products)
+        # -------------------------------------------------
+        # 신상품 분석
+        # -------------------------------------------------
+        if product_type == "신상품":
 
-# ---------------------------------------------------
-# 메트릭
-# ---------------------------------------------------
-st.header("📊 판매 전략 분석")
+            user_text = (
+                product_name + ' ' +
+                product_keywords + ' ' +
+                selected_category
+            )
 
-c1, c2, c3 = st.columns(3)
+            user_vector = vectorizer.transform(
+                [user_text]
+            )
 
-c1.metric(
-    "추천 할인율",
-    f"{market_discount:.1f}%"
-)
+            similarity_scores = cosine_similarity(
+                user_vector,
+                tfidf_matrix
+            ).flatten()
 
-c2.metric(
-    "시장 평균 평점",
-    f"{market_rating:.2f}"
-)
+            df['similarity'] = similarity_scores
 
-c3.metric(
-    "시장 평균 리뷰 수",
-    f"{market_review:.0f}"
-)
+            top_products = df[
+                df['display_category']
+                == selected_category
+            ]
 
-# ---------------------------------------------------
-# 경쟁 강도
-# ---------------------------------------------------
-st.subheader("⚔️ 시장 경쟁 분석")
+            price_min = product_price * 0.7
+            price_max = product_price * 1.3
 
-if competition_level >= 100:
+            top_products = top_products[
+                (top_products['discounted_price'] >= price_min) &
+                (top_products['discounted_price'] <= price_max)
+            ]
 
-    st.error("""
-경쟁 강도가 매우 높은 시장입니다 ⚠️
+            top_products = top_products.sort_values(
+                by='similarity',
+                ascending=False
+            )
 
-가격 경쟁과 할인 전략이 중요합니다.
+            top_products = top_products.head(
+                similar_count
+            )
+
+        # -------------------------------------------------
+        # 판매 중 상품 분석
+        # -------------------------------------------------
+        else:
+
+            top_products = df[
+                df['display_category']
+                == selected_category
+            ]
+
+            price_min = product_price * 0.7
+            price_max = product_price * 1.3
+
+            top_products = top_products[
+                (top_products['discounted_price'] >= price_min) &
+                (top_products['discounted_price'] <= price_max)
+            ]
+
+            top_products = top_products.head(
+                similar_count
+            )
+
+        # -------------------------------------------------
+        # 시장 분석
+        # -------------------------------------------------
+        market_discount = (
+            top_products['discount_percentage']
+            .mean()
+        )
+
+        market_rating = (
+            top_products['rating']
+            .mean()
+        )
+
+        market_review = (
+            top_products['rating_count']
+            .mean()
+        )
+
+        competition_level = len(top_products)
+
+    # =====================================================
+    # 분석 정보 카드
+    # =====================================================
+    st.header("📦 분석 정보")
+
+    st.markdown(f"""
+    <div class="info-card">
+
+    <h3>🎀 현재 분석 대상</h3>
+
+    <b>상품 유형</b> : {product_type}<br><br>
+
+    <b>카테고리</b> : {selected_category}<br><br>
+
+    <b>상품명</b> : {product_name}<br><br>
+
+    <b>참고 상품 수</b> : {similar_count}개
+
+    </div>
+    """, unsafe_allow_html=True)
+
+    # =====================================================
+    # 메트릭
+    # =====================================================
+    st.header("📊 판매 전략 분석")
+
+    c1, c2, c3 = st.columns(3)
+
+    c1.metric(
+        "추천 할인율",
+        f"{market_discount:.1f}%"
+    )
+
+    c2.metric(
+        "시장 평균 평점",
+        f"{market_rating:.2f}"
+    )
+
+    c3.metric(
+        "시장 평균 리뷰 수",
+        f"{market_review:.0f}"
+    )
+
+    # =====================================================
+    # 경쟁 분석
+    # =====================================================
+    st.subheader("⚔️ 시장 경쟁 분석")
+
+    if competition_level >= 100:
+
+        st.error("""
+경쟁 강도가 높은 시장입니다.
+
+가격 경쟁 및 할인 전략이 중요합니다.
 """)
 
-elif competition_level >= 40:
+    elif competition_level >= 40:
 
-    st.warning("""
-중간 수준 경쟁 시장입니다 ✨
+        st.warning("""
+중간 수준 경쟁 시장입니다.
 
 리뷰 확보 전략이 중요합니다.
 """)
 
-else:
+    else:
 
-    st.success("""
-경쟁 강도가 낮은 시장입니다 🌈
+        st.success("""
+경쟁 강도가 낮은 시장입니다.
 
 신규 판매 진입 가능성이 있습니다.
 """)
 
-# ---------------------------------------------------
-# 할인 전략
-# ---------------------------------------------------
-st.subheader("💡 AI 할인 전략 추천")
+    # =====================================================
+    # 할인 전략
+    # =====================================================
+    st.subheader("💡 할인 전략 추천")
 
-recommended_min = market_discount - 5
-recommended_max = market_discount + 5
+    recommended_min = market_discount - 5
+    recommended_max = market_discount + 5
 
-st.success(f"""
-추천 할인율 범위:
+    st.markdown(f"""
+    <div class="analysis-card">
 
-### {recommended_min:.1f}% ~ {recommended_max:.1f}%
+    <h3>추천 할인 전략</h3>
 
-비슷한 상품들은 평균적으로
-약 **{market_discount:.1f}% 할인율**에서
-높은 소비자 반응을 보였습니다.
-""")
+    <h2>{recommended_min:.1f}% ~ {recommended_max:.1f}%</h2>
 
-# ---------------------------------------------------
-# 참고 상품
-# ---------------------------------------------------
-st.header("🎀 참고 상품 데이터")
+    유사 상품들은 평균적으로  
+    약 <b>{market_discount:.1f}% 할인율</b>에서  
+    높은 소비자 반응을 보였습니다.
 
-show_cols = [
-    'product_name',
-    'display_category',
-    'discounted_price',
-    'discount_percentage',
-    'rating',
-    'rating_count'
-]
+    </div>
+    """, unsafe_allow_html=True)
 
-st.dataframe(
-    top_products[show_cols]
-)
+    # =====================================================
+    # 참고 상품
+    # =====================================================
+    st.header("🎀 참고 상품 데이터")
 
-# ---------------------------------------------------
-# 할인율 그래프
-# ---------------------------------------------------
-st.subheader("📉 할인율 비교")
+    show_cols = [
+        'product_name',
+        'display_category',
+        'discounted_price',
+        'discount_percentage',
+        'rating',
+        'rating_count'
+    ]
 
-chart_df = top_products[
-    ['product_name',
-     'discount_percentage']
-]
+    st.dataframe(
+        top_products[show_cols]
+    )
 
-chart_df = chart_df.set_index(
-    'product_name'
-)
+    # =====================================================
+    # 할인율 그래프
+    # =====================================================
+    st.subheader("📉 할인율 비교")
 
-st.bar_chart(chart_df)
+    chart_df = top_products[
+        ['product_name',
+         'discount_percentage']
+    ]
 
-# ---------------------------------------------------
-# 리뷰 수 그래프
-# ---------------------------------------------------
-st.subheader("⭐ 리뷰 수 비교")
+    chart_df = chart_df.set_index(
+        'product_name'
+    )
 
-review_chart = top_products[
-    ['product_name',
-     'rating_count']
-]
+    st.bar_chart(chart_df)
 
-review_chart = review_chart.set_index(
-    'product_name'
-)
+    # =====================================================
+    # 리뷰 수 그래프
+    # =====================================================
+    st.subheader("⭐ 리뷰 수 비교")
 
-st.bar_chart(review_chart)
+    review_chart = top_products[
+        ['product_name',
+         'rating_count']
+    ]
+
+    review_chart = review_chart.set_index(
+        'product_name'
+    )
+
+    st.bar_chart(review_chart)
+
+else:
+
+    st.markdown("""
+    ## 🎀 분석 시작 버튼을 눌러주세요
+
+    왼쪽 메뉴에서 상품 정보를 입력한 뒤  
+    `🎀 분석 시작` 버튼을 누르면  
+    분석 결과가 나타납니다.
+    """)
