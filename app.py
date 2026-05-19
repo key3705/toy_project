@@ -2,28 +2,37 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 
-# -----------------------------
+# ---------------------------------------
 # 페이지 설정
-# -----------------------------
+# ---------------------------------------
 st.set_page_config(
     page_title="AI Seller Strategy Platform",
     layout="wide"
 )
 
+# ---------------------------------------
+# 제목
+# ---------------------------------------
 st.title("🛒 AI Seller Strategy Platform")
-st.markdown("판매자를 위한 AI 기반 할인 전략 및 시장 분석 시스템")
+st.markdown(
+    """
+판매자를 위한 AI 기반 할인 전략 및 시장 분석 시스템  
+비슷한 상품들의 소비자 반응 데이터를 분석하여
+최적 할인 전략을 추천합니다.
+"""
+)
 
-# -----------------------------
+# ---------------------------------------
 # 데이터 로드
-# -----------------------------
+# ---------------------------------------
 df = pd.read_csv("amazon.csv")
 
-# -----------------------------
+# ---------------------------------------
 # 데이터 전처리
-# -----------------------------
+# ---------------------------------------
 df = df.copy()
 
-# 가격 처리
+# 문자열 처리
 df['discounted_price'] = (
     df['discounted_price']
     .astype(str)
@@ -60,7 +69,10 @@ numeric_cols = [
 ]
 
 for col in numeric_cols:
-    df[col] = pd.to_numeric(df[col], errors='coerce')
+    df[col] = pd.to_numeric(
+        df[col],
+        errors='coerce'
+    )
 
 # 결측 제거
 df = df.dropna(subset=numeric_cols)
@@ -71,84 +83,135 @@ df['consumer_score'] = (
     np.log1p(df['rating_count'])
 )
 
-# -----------------------------
-# 상품 유형 선택
-# -----------------------------
-st.sidebar.header("📌 판매 상품 설정")
+# ---------------------------------------
+# 사이드바
+# ---------------------------------------
+st.sidebar.header("📌 상품 정보 입력")
 
+# 상품 유형
 product_type = st.sidebar.radio(
-    "상품 유형",
+    "상품 유형 선택",
     ["신상품", "현재 판매 중 상품"]
 )
 
-# -----------------------------
-# 상품 검색
-# -----------------------------
-search_keyword = st.sidebar.text_input(
-    "상품 검색",
-    "smartphone"
+# ---------------------------------------
+# 추천 검색 품목
+# ---------------------------------------
+st.sidebar.subheader("🔥 추천 검색 품목")
+
+recommended_items = [
+    "smartphone",
+    "earbuds",
+    "keyboard",
+    "mouse",
+    "tablet",
+    "speaker",
+    "charger",
+    "smartwatch",
+    "headphones",
+    "power bank"
+]
+
+selected_recommendation = st.sidebar.selectbox(
+    "추천 품목 선택",
+    recommended_items
 )
 
-# 검색 결과
+# ---------------------------------------
+# 검색
+# ---------------------------------------
+search_keyword = st.sidebar.text_input(
+    "상품 검색",
+    selected_recommendation
+)
+
+# ---------------------------------------
+# 상품 검색 결과
+# ---------------------------------------
 search_result = df[
     df['product_name']
-    .str.contains(search_keyword,
-                  case=False,
-                  na=False)
+    .str.contains(
+        search_keyword,
+        case=False,
+        na=False
+    )
 ]
 
 search_result = search_result.head(15)
 
-# -----------------------------
-# 검색 결과 출력
-# -----------------------------
+# ---------------------------------------
+# 검색 결과 표시
+# ---------------------------------------
 st.sidebar.subheader("🔍 검색 결과")
 
 if len(search_result) == 0:
 
-    st.sidebar.warning("검색 결과가 없습니다.")
+    st.sidebar.warning(
+        "검색 결과가 없습니다."
+    )
 
     st.stop()
 
-# 상품 목록
+# 상품 목록 생성
 product_options = []
 
 for idx, row in search_result.iterrows():
 
-    name = row['product_name'][:60]
-
-    option_text = (
-        f"{name}"
+    option = (
+        f"[{len(product_options)+1}] "
+        f"{row['product_name'][:65]}"
     )
 
-    product_options.append(option_text)
+    product_options.append(option)
 
-# 선택
+# 상품 선택
 selected_option = st.sidebar.selectbox(
     "분석할 상품 선택",
     product_options
 )
 
-# 선택된 상품 row
-selected_idx = product_options.index(selected_option)
+selected_idx = product_options.index(
+    selected_option
+)
 
 selected_product = (
     search_result.iloc[selected_idx]
 )
 
-# -----------------------------
+# ---------------------------------------
 # 선택 상품 정보
-# -----------------------------
-product_name = selected_product['product_name']
-product_category = selected_product['category']
-product_price = selected_product['discounted_price']
-product_discount = selected_product['discount_percentage']
-product_rating = selected_product['rating']
-product_review = selected_product['rating_count']
+# ---------------------------------------
+product_name = (
+    selected_product['product_name']
+)
 
-# -----------------------------
-# 판매 중 상품 추가 정보
-# -----------------------------
+product_category = (
+    selected_product['category']
+)
+
+product_price = (
+    selected_product['discounted_price']
+)
+
+product_discount = (
+    selected_product['discount_percentage']
+)
+
+product_rating = (
+    selected_product['rating']
+)
+
+product_review = (
+    selected_product['rating_count']
+)
+
+product_score = (
+    selected_product['consumer_score']
+)
+
+# ---------------------------------------
+# 판매 중 상품 입력
+# ---------------------------------------
 if product_type == "현재 판매 중 상품":
 
     st.sidebar.subheader("📈 현재 판매 상태")
@@ -173,9 +236,9 @@ if product_type == "현재 판매 중 상품":
         value=int(product_review)
     )
 
-# -----------------------------
+# ---------------------------------------
 # 메인 상품 정보
-# -----------------------------
+# ---------------------------------------
 st.header("📦 선택 상품 정보")
 
 col1, col2 = st.columns(2)
@@ -196,9 +259,9 @@ with col2:
     st.subheader("현재 할인율")
     st.write(f"{product_discount:.1f}%")
 
-# -----------------------------
+# ---------------------------------------
 # 경쟁 상품 분석
-# -----------------------------
+# ---------------------------------------
 competitors = df[
     df['category'] == product_category
 ]
@@ -212,7 +275,7 @@ competitors = competitors[
     (competitors['discounted_price'] <= price_max)
 ]
 
-# 소비자 반응 상위
+# 소비자 반응 순 정렬
 competitors = competitors.sort_values(
     by='consumer_score',
     ascending=False
@@ -220,9 +283,9 @@ competitors = competitors.sort_values(
 
 top_competitors = competitors.head(10)
 
-# -----------------------------
-# 시장 분석
-# -----------------------------
+# ---------------------------------------
+# 시장 평균 계산
+# ---------------------------------------
 market_discount = (
     top_competitors['discount_percentage']
     .mean()
@@ -243,10 +306,10 @@ market_score = (
     .mean()
 )
 
-# -----------------------------
-# AI 전략 분석
-# -----------------------------
-st.header("📊 AI 판매 전략 분석")
+# ---------------------------------------
+# AI 시장 분석
+# ---------------------------------------
+st.header("📊 AI 시장 분석")
 
 c1, c2, c3, c4 = st.columns(4)
 
@@ -270,10 +333,10 @@ c4.metric(
     len(competitors)
 )
 
-# -----------------------------
-# 시장 포지션 분석
-# -----------------------------
-st.subheader("🧠 시장 포지션 분석")
+# ---------------------------------------
+# 가격 포지션 분석
+# ---------------------------------------
+st.subheader("🧠 가격 포지션 분석")
 
 if product_price < competitors[
     'discounted_price'
@@ -291,13 +354,13 @@ else:
 
     position = "프리미엄 시장"
 
-st.info(f"""
-현재 상품은 **{position}** 에 위치합니다.
-""")
+st.info(
+    f"현재 상품은 **{position}** 에 위치합니다."
+)
 
-# -----------------------------
+# ---------------------------------------
 # 경쟁 강도 분석
-# -----------------------------
+# ---------------------------------------
 st.subheader("⚔️ 경쟁 강도 분석")
 
 competition_level = len(competitors)
@@ -323,31 +386,29 @@ else:
     st.success("""
 경쟁 강도가 비교적 낮습니다.
 
-신규 판매 진입 가능성이 있습니다.
+신규 진입 가능성이 있습니다.
 """)
 
-# -----------------------------
-# 할인 전략 추천
-# -----------------------------
+# ---------------------------------------
+# AI 할인 전략 추천
+# ---------------------------------------
 st.subheader("💡 AI 할인 전략 추천")
 
 recommended_min = market_discount - 5
 recommended_max = market_discount + 5
 
 st.success(f"""
-현재 시장 데이터를 분석한 결과,
-
 추천 할인율 범위:
 ### {recommended_min:.1f}% ~ {recommended_max:.1f}%
 
-특히 비슷한 가격대 상품들은
-약 **{market_discount:.1f}% 할인율**에서
+비슷한 가격대와 카테고리 상품들은
+평균적으로 약 **{market_discount:.1f}% 할인율**에서
 높은 소비자 반응을 보였습니다.
 """)
 
-# -----------------------------
-# 판매 중 상품 분석
-# -----------------------------
+# ---------------------------------------
+# 판매 중 상품 전략 평가
+# ---------------------------------------
 if product_type == "현재 판매 중 상품":
 
     st.subheader("📈 현재 판매 전략 평가")
@@ -391,9 +452,9 @@ if product_type == "현재 판매 중 상품":
 수익성 개선 가능성이 있습니다.
 """)
 
-# -----------------------------
+# ---------------------------------------
 # 경쟁 상품 TOP10
-# -----------------------------
+# ---------------------------------------
 st.header("🏆 경쟁 상품 TOP10")
 
 show_cols = [
@@ -408,25 +469,25 @@ st.dataframe(
     top_competitors[show_cols]
 )
 
-# -----------------------------
+# ---------------------------------------
 # 할인율 그래프
-# -----------------------------
+# ---------------------------------------
 st.subheader("📉 경쟁 상품 할인율 비교")
 
-chart_df = top_competitors[
+discount_chart = top_competitors[
     ['product_name',
      'discount_percentage']
 ]
 
-chart_df = chart_df.set_index(
+discount_chart = discount_chart.set_index(
     'product_name'
 )
 
-st.bar_chart(chart_df)
+st.bar_chart(discount_chart)
 
-# -----------------------------
+# ---------------------------------------
 # 리뷰 수 그래프
-# -----------------------------
+# ---------------------------------------
 st.subheader("⭐ 경쟁 상품 리뷰 수 비교")
 
 review_chart = top_competitors[
@@ -440,9 +501,9 @@ review_chart = review_chart.set_index(
 
 st.bar_chart(review_chart)
 
-# -----------------------------
-# 데이터 확인
-# -----------------------------
+# ---------------------------------------
+# 전체 데이터 보기
+# ---------------------------------------
 with st.expander("전체 데이터 보기"):
 
     st.dataframe(df.head(100))
