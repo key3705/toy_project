@@ -507,3 +507,66 @@ st.bar_chart(review_chart)
 with st.expander("전체 데이터 보기"):
 
     st.dataframe(df.head(100))
+
+st.markdown("""
+<style>
+
+/* 전체 배경 */
+.stApp {
+    background-color: #FFF8E7;
+    color: #4B3F35;
+}
+
+/* 사이드바 */
+section[data-testid="stSidebar"] {
+    background-color: #FFE8B6;
+}
+
+/* 카드 느낌 */
+div[data-testid="metric-container"] {
+    background-color: #FFF2CC;
+    border-radius: 20px;
+    padding: 15px;
+    border: 2px solid #F4D58D;
+    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
+}
+
+/* 버튼 */
+.stButton > button {
+    background-color: #FFD166;
+    color: #4B3F35;
+    border-radius: 15px;
+    border: none;
+    padding: 10px 20px;
+    font-weight: bold;
+}
+
+/* 입력창 */
+.stTextInput > div > div > input {
+    background-color: #FFFDF7;
+    border-radius: 15px;
+}
+
+/* selectbox */
+.stSelectbox > div > div {
+    background-color: #FFFDF7;
+    border-radius: 15px;
+}
+
+/* 슬라이더 */
+.stSlider > div {
+    color: #F4A261;
+}
+
+/* 제목 */
+h1 {
+    color: #E07A5F;
+}
+
+/* 서브헤더 */
+h2, h3 {
+    color: #7A5C58;
+}
+
+</style>
+""", unsafe_allow_html=True)
