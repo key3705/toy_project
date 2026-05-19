@@ -513,59 +513,97 @@ st.markdown("""
 
 /* 전체 배경 */
 .stApp {
-    background-color: #FFF8E7;
-    color: #4B3F35;
+    background-color: #FFF9F0;
+    color: #4E3D35;
+}
+
+/* 메인 영역 */
+.main .block-container {
+    padding-top: 2rem;
+    padding-left: 3rem;
+    padding-right: 3rem;
 }
 
 /* 사이드바 */
 section[data-testid="stSidebar"] {
-    background-color: #FFE8B6;
+    background-color: #FFD98E;
+    border-right: 3px solid #F6C667;
 }
 
-/* 카드 느낌 */
-div[data-testid="metric-container"] {
-    background-color: #FFF2CC;
-    border-radius: 20px;
-    padding: 15px;
-    border: 2px solid #F4D58D;
-    box-shadow: 2px 2px 8px rgba(0,0,0,0.1);
-}
-
-/* 버튼 */
-.stButton > button {
-    background-color: #FFD166;
-    color: #4B3F35;
-    border-radius: 15px;
-    border: none;
-    padding: 10px 20px;
-    font-weight: bold;
+/* 사이드바 글씨 */
+section[data-testid="stSidebar"] * {
+    color: #5B4636 !important;
 }
 
 /* 입력창 */
-.stTextInput > div > div > input {
-    background-color: #FFFDF7;
-    border-radius: 15px;
+.stTextInput input {
+    background-color: white !important;
+    color: #4E3D35 !important;
+    border-radius: 15px !important;
+    border: 2px solid #F6C667 !important;
 }
 
 /* selectbox */
-.stSelectbox > div > div {
-    background-color: #FFFDF7;
-    border-radius: 15px;
+.stSelectbox div[data-baseweb="select"] {
+    background-color: white !important;
+    border-radius: 15px !important;
 }
 
-/* 슬라이더 */
-.stSlider > div {
-    color: #F4A261;
+/* number input */
+.stNumberInput input {
+    background-color: white !important;
+    color: #4E3D35 !important;
+}
+
+/* metric 카드 */
+div[data-testid="metric-container"] {
+    background-color: white;
+    border-radius: 25px;
+    padding: 20px;
+    border: 2px solid #FFE4B5;
+    box-shadow: 0px 4px 10px rgba(0,0,0,0.08);
 }
 
 /* 제목 */
 h1 {
-    color: #E07A5F;
+    color: #5B4636;
+    font-size: 3rem;
 }
 
-/* 서브헤더 */
+/* 소제목 */
 h2, h3 {
     color: #7A5C58;
+}
+
+/* dataframe */
+[data-testid="stDataFrame"] {
+    border-radius: 20px;
+    overflow: hidden;
+}
+
+/* 버튼 */
+.stButton button {
+    background-color: #FFB86B !important;
+    color: white !important;
+    border-radius: 15px !important;
+    border: none !important;
+    font-weight: bold;
+}
+
+/* expander */
+.streamlit-expanderHeader {
+    background-color: #FFF1D6;
+    border-radius: 15px;
+}
+
+/* radio */
+.stRadio label {
+    font-weight: 600;
+}
+
+/* slider */
+.stSlider {
+    color: #F4A261 !important;
 }
 
 </style>
