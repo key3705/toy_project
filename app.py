@@ -115,12 +115,6 @@ div[role="listbox"] * {
     overflow: hidden;
 }
 
-/* expander */
-.streamlit-expanderHeader {
-    background-color: #ECE9FF;
-    border-radius: 15px;
-}
-
 /* info card */
 .info-card {
     background-color: white;
@@ -262,7 +256,7 @@ product_type = st.sidebar.radio(
 )
 
 # =========================================================
-# 신상품
+# 신상품 모드
 # =========================================================
 if product_type == "신상품":
 
@@ -295,6 +289,7 @@ if product_type == "신상품":
         value=5000.0
     )
 
+    # 신상품만 유사 상품 개수 사용
     similar_count = st.sidebar.slider(
         "유사 상품 고려 개수",
         3,
@@ -303,7 +298,7 @@ if product_type == "신상품":
     )
 
 # =========================================================
-# 판매 중 상품
+# 현재 판매 중 상품
 # =========================================================
 else:
 
@@ -337,7 +332,7 @@ else:
             case=False,
             na=False
         )
-    ].head(15)
+    ].head(20)
 
     product_options = []
 
@@ -375,13 +370,6 @@ else:
         selected_product['discounted_price']
     )
 
-    similar_count = st.sidebar.slider(
-        "유사 상품 고려 개수",
-        3,
-        20,
-        10
-    )
-
 # =========================================================
 # 분석 버튼
 # =========================================================
@@ -390,15 +378,15 @@ analyze_button = st.sidebar.button(
 )
 
 # =========================================================
-# 분석 실행
+# 분석 시작
 # =========================================================
 if analyze_button:
 
     with st.spinner("🎮 시장 데이터를 분석 중이에요..."):
 
-        # -------------------------------------------------
+        # =================================================
         # 신상품 분석
-        # -------------------------------------------------
+        # =================================================
         if product_type == "신상품":
 
             user_text = (
@@ -423,6 +411,7 @@ if analyze_button:
                 == selected_category
             ]
 
+            # 가격대 필터
             price_min = product_price * 0.7
             price_max = product_price * 1.3
 
@@ -431,25 +420,29 @@ if analyze_button:
                 (top_products['discounted_price'] <= price_max)
             ]
 
+            # similarity 기준 정렬
             top_products = top_products.sort_values(
                 by='similarity',
                 ascending=False
             )
 
+            # 신상품만 유사 상품 개수 제한
             top_products = top_products.head(
                 similar_count
             )
 
-        # -------------------------------------------------
+        # =================================================
         # 판매 중 상품 분석
-        # -------------------------------------------------
+        # =================================================
         else:
 
+            # 같은 카테고리 전체 시장 분석
             top_products = df[
                 df['display_category']
                 == selected_category
             ]
 
+            # 비슷한 가격대 전체 포함
             price_min = product_price * 0.7
             price_max = product_price * 1.3
 
@@ -458,13 +451,9 @@ if analyze_button:
                 (top_products['discounted_price'] <= price_max)
             ]
 
-            top_products = top_products.head(
-                similar_count
-            )
-
-        # -------------------------------------------------
+        # =================================================
         # 시장 분석
-        # -------------------------------------------------
+        # =================================================
         market_discount = (
             top_products['discount_percentage']
             .mean()
@@ -482,10 +471,23 @@ if analyze_button:
 
         competition_level = len(top_products)
 
+        avg_consumer_score = (
+            top_products['consumer_score']
+            .mean()
+        )
+
     # =====================================================
-    # 분석 정보 카드
+    # 분석 정보
     # =====================================================
     st.header("📦 분석 정보")
+
+    if product_type == "신상품":
+
+        count_text = f"{similar_count}개"
+
+    else:
+
+        count_text = f"{competition_level}개"
 
     st.markdown(f"""
     <div class="info-card">
@@ -498,7 +500,7 @@ if analyze_button:
 
     <b>상품명</b> : {product_name}<br><br>
 
-    <b>참고 상품 수</b> : {similar_count}개
+    <b>분석 대상 상품 수</b> : {count_text}
 
     </div>
     """, unsafe_allow_html=True)
@@ -508,7 +510,7 @@ if analyze_button:
     # =====================================================
     st.header("📊 판매 전략 분석")
 
-    c1, c2, c3 = st.columns(3)
+    c1, c2, c3, c4 = st.columns(4)
 
     c1.metric(
         "추천 할인율",
@@ -523,6 +525,11 @@ if analyze_button:
     c3.metric(
         "시장 평균 리뷰 수",
         f"{market_review:.0f}"
+    )
+
+    c4.metric(
+        "소비자 반응 점수",
+        f"{avg_consumer_score:.1f}"
     )
 
     # =====================================================
@@ -555,7 +562,7 @@ if analyze_button:
 """)
 
     # =====================================================
-    # 할인 전략
+    # 할인 전략 추천
     # =====================================================
     st.subheader("💡 할인 전략 추천")
 
@@ -569,7 +576,7 @@ if analyze_button:
 
     <h2>{recommended_min:.1f}% ~ {recommended_max:.1f}%</h2>
 
-    유사 상품들은 평균적으로  
+    유사 시장 상품들은 평균적으로  
     약 <b>{market_discount:.1f}% 할인율</b>에서  
     높은 소비자 반응을 보였습니다.
 
@@ -577,7 +584,7 @@ if analyze_button:
     """, unsafe_allow_html=True)
 
     # =====================================================
-    # 참고 상품
+    # 참고 상품 데이터
     # =====================================================
     st.header("🎀 참고 상품 데이터")
 
