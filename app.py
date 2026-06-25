@@ -985,6 +985,38 @@ with st.expander("🔍 유사 상품 TOP 15 보기"):
 with st.expander("📋 할인율별 전체 시뮬레이션 테이블"):
     disp = sim[['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수','추천점수']].copy()
     disp['예상 리뷰 수'] = disp['예상 리뷰 수'].astype(int)
-    disp = disp.rename(columns={'할인 후 가격': '할인 후 가격 (₹)'})
-    disp['할인 후 가격 (₹)'] = disp['할인 후 가격 (₹)'].apply(lambda x: f"₹{x:,}")
-    st.dataframe(disp.reset_index(drop=True), use_container_width=True)
+    best_d = int(best['할인율(%)'])
+
+    td = "padding:10px 14px;text-align:left;color:#111827;border-bottom:1px solid #F3F4F6;"
+    th = ("padding:10px 14px;text-align:left;font-size:0.7rem;font-weight:700;"
+          "text-transform:uppercase;letter-spacing:0.8px;color:#9CA3AF;border-bottom:2px solid #E5E7EB;")
+
+    rows = ""
+    for _, r in disp.iterrows():
+        is_best = int(r['할인율(%)']) == best_d
+        bg = "background:#F5F3FF;" if is_best else ""
+        badge = (' <span style="background:#4F46E5;color:white;border-radius:4px;'
+                 'padding:1px 7px;font-size:0.7rem;font-weight:700;margin-left:6px;">추천</span>'
+                 if is_best else "")
+        rows += (f'<tr style="{bg}">'
+                 f'<td style="{td}">{int(r["할인율(%)"])}%{badge}</td>'
+                 f'<td style="{td}">₹{int(r["할인 후 가격"]):,}</td>'
+                 f'<td style="{td}">{r["예상 평점"]:.1f}</td>'
+                 f'<td style="{td}">{int(r["예상 리뷰 수"]):,}개</td>'
+                 f'<td style="{td}">{r["추천점수"]:.1f}점</td>'
+                 f'</tr>')
+
+    st.markdown(f"""
+    <div style="overflow-x:auto;">
+    <table style="width:100%;border-collapse:collapse;font-size:0.87rem;font-family:'Inter',sans-serif;">
+      <thead><tr>
+        <th style="{th}">할인율</th>
+        <th style="{th}">할인 후 가격 (₹)</th>
+        <th style="{th}">예상 평점</th>
+        <th style="{th}">예상 리뷰 수</th>
+        <th style="{th}">추천점수</th>
+      </tr></thead>
+      <tbody>{rows}</tbody>
+    </table>
+    </div>
+    """, unsafe_allow_html=True)
