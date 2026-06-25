@@ -57,6 +57,9 @@ Cosine Similarity 계산       평점 예측 / 리뷰 수 예측
 ```
 <img width="1513" height="909" alt="image" src="https://github.com/user-attachments/assets/c8972a2e-ad5b-4350-b468-4d17c307a22b" />
 
+<img width="1535" height="874" alt="image" src="https://github.com/user-attachments/assets/d138f206-6e56-4ceb-bb3b-4c9266e90691" />
+
+<img width="1519" height="888" alt="image" src="https://github.com/user-attachments/assets/715a402f-1523-4b35-abc9-edcc64f10f6e" />
 
 ---
 
