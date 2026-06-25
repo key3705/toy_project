@@ -286,13 +286,6 @@ section[data-testid="stSidebar"] .stButton button:hover {
 
 
 
-/* ── selectbox 직접 입력 비활성화 */
-section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] input {
-    pointer-events: none !important;
-    caret-color: transparent !important;
-    user-select: none !important;
-}
-
 /* ── misc */
 [data-testid="stDataFrame"] { border-radius:10px; overflow:hidden; border:1px solid #E5E7EB !important; }
 .stDivider { border-color:#F3F4F6 !important; }
@@ -691,8 +684,13 @@ with st.sidebar:
         rec = ["earbuds","headphones","keyboard","mouse","tablet",
                "speaker","charger","smartwatch","laptop","cable"]
 
-        # 추천 검색어 selectbox
-        skw = st.selectbox("추천 검색어", rec, index=0)
+        # 추천 검색어 selectbox + 직접 검색 text_input
+        sel_item = st.selectbox("추천 검색어", rec, index=0)
+        skw = st.text_input(
+            "직접 검색",
+            value=sel_item,
+            placeholder="예) cheap pretty headphone",
+        )
 
         sv = vec.transform([skw])
         ss = cosine_similarity(sv, tmat).flatten()
@@ -728,12 +726,7 @@ with st.sidebar:
     st.markdown('<div class="sb-label">STEP 3 · 분석 실행</div>', unsafe_allow_html=True)
     go_btn = st.button("분석 시작", use_container_width=True)
 
-    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
-    st.markdown(f"""
-    <div style="display:flex;flex-direction:column;gap:5px;">
-      <div class="mbadge">✅ 리뷰 예측 모델 R² = {r2r}</div>
-      <div class="mbadge">✅ 평점 예측 모델 R² = {r2rt}</div>
-    </div>""", unsafe_allow_html=True)
+
 
 
 # =========================================================
