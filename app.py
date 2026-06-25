@@ -271,7 +271,6 @@ section[data-testid="stSidebar"] .stButton button:hover {
           background:#F0FDF4; border:1px solid #BBF7D0; border-radius:7px;
           padding:4px 10px; font-size:0.75rem; font-weight:600; color:#065F46; }
 
-/* ── 추천 검색어 칩 버튼 */
 section[data-testid="stSidebar"] .stButton button {
     background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
     color: #fff !important; border-radius: 10px !important; border: none !important;
@@ -285,26 +284,7 @@ section[data-testid="stSidebar"] .stButton button:hover {
     transform: translateY(-1px);
 }
 
-/* 추천 검색어 칩 — 작은 버튼 스타일 (분석 시작 버튼과 구분) */
-section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] .stButton button {
-    background: #F3F4F6 !important;
-    color: #374151 !important;
-    border-radius: 8px !important;
-    border: 1.5px solid #E5E7EB !important;
-    font-size: 0.78rem !important;
-    font-weight: 600 !important;
-    padding: 5px 4px !important;
-    box-shadow: none !important;
-    margin-top: 0 !important;
-    transition: all 0.12s !important;
-}
-section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] .stButton button:hover {
-    background: #EEF2FF !important;
-    color: #4F46E5 !important;
-    border-color: #C7D2FE !important;
-    transform: none !important;
-    box-shadow: none !important;
-}
+
 
 /* ── misc */
 [data-testid="stDataFrame"] { border-radius:10px; overflow:hidden; border:1px solid #E5E7EB !important; }
@@ -704,22 +684,20 @@ with st.sidebar:
         rec = ["earbuds","headphones","keyboard","mouse","tablet",
                "speaker","charger","smartwatch","laptop","cable"]
 
-        # 추천 검색어 칩 UI
-        st.markdown('<div style="font-size:0.72rem;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">추천 검색어</div>', unsafe_allow_html=True)
-        chip_cols = st.columns(5)
-        chip_clicked = None
-        for ci, chip in enumerate(rec):
-            if chip_cols[ci % 5].button(chip, key=f"chip_{chip}", use_container_width=True):
-                chip_clicked = chip
+        # 추천 검색어 selectbox (빠른 선택)
+        sel_item = st.selectbox(
+            "추천 검색어",
+            rec,
+            help="자주 찾는 검색어를 선택하면 아래 검색창에 자동 입력됩니다."
+        )
 
-        # 검색어 상태 관리
-        if chip_clicked:
-            st.session_state["skw"] = chip_clicked
-        if "skw" not in st.session_state:
-            st.session_state["skw"] = "earbuds"
-
-        skw = st.text_input("🔍 상품 검색", value=st.session_state["skw"], key="search_input")
-        st.session_state["skw"] = skw
+        # 직접 검색 (자유 입력) — selectbox 선택값이 기본값
+        skw = st.text_input(
+            "🔍 직접 검색",
+            value=sel_item,
+            placeholder="상품명을 영어로 입력하세요",
+            help="직접 입력하면 더 정확한 검색이 가능합니다."
+        )
 
         sv = vec.transform([skw])
         ss = cosine_similarity(sv, tmat).flatten()
