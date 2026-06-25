@@ -985,4 +985,6 @@ with st.expander("🔍 유사 상품 TOP 15 보기"):
 with st.expander("📋 할인율별 전체 시뮬레이션 테이블"):
     disp = sim[['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수','추천점수']].copy()
     disp['예상 리뷰 수'] = disp['예상 리뷰 수'].astype(int)
+    disp = disp.rename(columns={'할인 후 가격': '할인 후 가격 (₹)'})
+    disp['할인 후 가격 (₹)'] = disp['할인 후 가격 (₹)'].apply(lambda x: f"₹{x:,}")
     st.dataframe(disp.reset_index(drop=True), use_container_width=True)
