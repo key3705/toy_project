@@ -18,716 +18,619 @@ from sklearn.metrics.pairwise import cosine_similarity
 # 페이지 설정
 # =========================================================
 st.set_page_config(
-    page_title="Seller Assistant",
-    page_icon="🛒",
+    page_title="AI 판매 전략 대시보드",
+    page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
 # =========================================================
-# CSS — 밝고 모던한 스타트업 스타일
+# CSS
 # =========================================================
 st.markdown("""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,700;0,800;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 
-/* ── 전체 배경 */
+/* ── 전체 */
 .stApp {
-    background-color: #F8F9FC;
+    background-color: #F9FAFB;
     font-family: 'Inter', sans-serif;
-    color: #1A1D2E;
+    color: #111827;
 }
-
 .block-container {
     padding-top: 2rem;
-    padding-left: 2.8rem;
-    padding-right: 2.8rem;
+    padding-left: 2.6rem;
+    padding-right: 2.6rem;
     max-width: 1440px;
 }
 
-/* ── 사이드바 — 흰 배경 + 좌측 컬러 보더 */
+/* ── 사이드바 */
 section[data-testid="stSidebar"] {
     background-color: #FFFFFF;
-    border-right: 1px solid #E8EAF2;
-    box-shadow: 2px 0 12px rgba(0,0,0,0.04);
+    border-right: 1px solid #E5E7EB;
+    box-shadow: 1px 0 8px rgba(0,0,0,0.03);
 }
-
 section[data-testid="stSidebar"] .block-container {
-    padding-top: 1.6rem;
-    padding-left: 1.4rem;
-    padding-right: 1.4rem;
+    padding-top: 0; padding-left: 1.2rem; padding-right: 1.2rem;
 }
+section[data-testid="stSidebar"] * { color: #111827 !important; }
 
-/* 사이드바 전체 텍스트 */
-section[data-testid="stSidebar"] * {
-    color: #1A1D2E !important;
+.sb-logo {
+    display: flex; align-items: center; gap: 10px;
+    padding: 20px 4px 18px;
+    border-bottom: 1px solid #F3F4F6; margin-bottom: 18px;
 }
-
-/* 사이드바 로고 영역 */
-.sidebar-logo {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 14px 16px 20px;
-    border-bottom: 1px solid #F0F1F8;
-    margin-bottom: 20px;
-}
-.sidebar-logo-icon {
-    width: 36px; height: 36px;
-    background: linear-gradient(135deg, #4F46E5, #7C3AED);
-    border-radius: 10px;
+.sb-logo-icon {
+    width: 34px; height: 34px;
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    border-radius: 9px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
 }
-.sidebar-logo-text {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1A1D2E !important;
-    letter-spacing: -0.3px;
-}
-
-/* 사이드바 섹션 레이블 */
-.sidebar-section-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #9CA3AF !important;
-    margin: 18px 0 8px;
-    padding: 0 2px;
+.sb-logo-name  { font-size: 0.98rem; font-weight: 800; letter-spacing: -0.3px; }
+.sb-logo-sub   { font-size: 0.7rem;  color: #9CA3AF !important; margin-top: 1px; }
+.sb-label {
+    font-size: 0.65rem; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 1.3px;
+    color: #9CA3AF !important; margin: 16px 0 6px; padding: 0 2px;
 }
 
-/* 사이드바 라디오 커스텀 */
-section[data-testid="stSidebar"] .stRadio > div {
-    gap: 6px;
-}
+section[data-testid="stSidebar"] .stRadio > div { gap: 5px; }
 section[data-testid="stSidebar"] .stRadio label {
-    background: #F8F9FC;
-    border: 1.5px solid #E8EAF2;
-    border-radius: 10px;
-    padding: 9px 14px !important;
-    font-size: 0.9rem !important;
-    font-weight: 500 !important;
-    transition: all 0.15s;
-    cursor: pointer;
-    width: 100%;
+    background: #F9FAFB; border: 1.5px solid #E5E7EB;
+    border-radius: 9px; padding: 8px 12px !important;
+    font-size: 0.87rem !important; font-weight: 500 !important;
+    cursor: pointer; transition: all 0.12s; width: 100%;
 }
 section[data-testid="stSidebar"] .stRadio label:hover {
-    background: #EEF2FF;
-    border-color: #C7D2FE;
+    background: #EEF2FF; border-color: #C7D2FE;
 }
 
-/* 입력창 */
 section[data-testid="stSidebar"] input,
 section[data-testid="stSidebar"] .stTextInput input,
 section[data-testid="stSidebar"] .stNumberInput input {
-    background-color: #F8F9FC !important;
-    border: 1.5px solid #E2E5F1 !important;
-    border-radius: 10px !important;
-    color: #1A1D2E !important;
-    font-size: 0.9rem !important;
-    padding: 9px 12px !important;
-    transition: border-color 0.15s;
+    background: #F9FAFB !important; border: 1.5px solid #E2E5F1 !important;
+    border-radius: 9px !important; color: #111827 !important;
+    font-size: 0.87rem !important; padding: 8px 11px !important;
 }
 section[data-testid="stSidebar"] input:focus {
     border-color: #6366F1 !important;
     box-shadow: 0 0 0 3px rgba(99,102,241,0.1) !important;
 }
-
-/* 셀렉트박스 */
 section[data-testid="stSidebar"] .stSelectbox div[data-baseweb="select"] {
-    background-color: #F8F9FC !important;
-    border: 1.5px solid #E2E5F1 !important;
-    border-radius: 10px !important;
+    background: #F9FAFB !important; border: 1.5px solid #E2E5F1 !important; border-radius: 9px !important;
 }
-
-/* 분석 버튼 */
 section[data-testid="stSidebar"] .stButton button {
-    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%) !important;
-    color: white !important;
-    border-radius: 12px !important;
-    border: none !important;
-    font-size: 0.95rem !important;
-    font-weight: 700 !important;
-    padding: 13px 20px !important;
-    width: 100%;
-    letter-spacing: 0.2px;
-    box-shadow: 0 4px 14px rgba(79,70,229,0.35) !important;
-    transition: all 0.2s !important;
-    margin-top: 6px;
+    background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+    color: #fff !important; border-radius: 10px !important; border: none !important;
+    font-size: 0.92rem !important; font-weight: 700 !important;
+    padding: 12px 18px !important; width: 100%;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.32) !important;
+    transition: all 0.18s !important; margin-top: 4px;
 }
 section[data-testid="stSidebar"] .stButton button:hover {
-    box-shadow: 0 6px 20px rgba(79,70,229,0.45) !important;
+    box-shadow: 0 5px 18px rgba(79,70,229,0.42) !important;
     transform: translateY(-1px);
 }
 
-/* ── 메인 헤더 */
-h1 {
-    font-size: 2rem !important;
-    font-weight: 800 !important;
-    color: #1A1D2E !important;
-    letter-spacing: -0.8px !important;
-    line-height: 1.2 !important;
+/* ── 헤더 */
+.page-header { padding-bottom: 18px; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
+.page-header-eyebrow {
+    font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.4px; color: #9CA3AF; margin-bottom: 4px;
 }
-h2 {
-    font-size: 1.25rem !important;
-    font-weight: 700 !important;
-    color: #1A1D2E !important;
-    letter-spacing: -0.3px !important;
+.page-header-title {
+    font-size: 1.6rem; font-weight: 800; color: #111827;
+    letter-spacing: -0.6px; line-height: 1.2; margin-bottom: 4px;
 }
-h3 {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
-    color: #374151 !important;
+.page-header-sub { font-size: 0.88rem; color: #6B7280; }
+
+/* ── 상품 요약 카드 */
+.product-card {
+    background: #fff; border: 1px solid #E5E7EB;
+    border-radius: 14px; padding: 18px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    margin-bottom: 20px;
+    display: flex; align-items: center; gap: 20px; flex-wrap: wrap;
+}
+.product-card-name {
+    font-size: 0.98rem; font-weight: 700; color: #111827;
+    letter-spacing: -0.2px; flex: 1; min-width: 200px;
+}
+.product-meta { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+
+/* ── 핵심 지표 — 추천 할인율 강조 카드 */
+.metric-hero {
+    background: linear-gradient(135deg, #4F46E5 0%, #7C3AED 100%);
+    border-radius: 16px; padding: 22px 26px;
+    box-shadow: 0 4px 20px rgba(79,70,229,0.28);
+    color: #fff;
+}
+.metric-hero-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1.2px; color: rgba(255,255,255,0.7); margin-bottom: 4px;
+}
+.metric-hero-value {
+    font-size: 3rem; font-weight: 800; letter-spacing: -2px; line-height: 1;
+    color: #fff; margin-bottom: 4px;
+}
+.metric-hero-badge {
+    display: inline-block; background: rgba(255,255,255,0.18);
+    border-radius: 6px; padding: 3px 10px;
+    font-size: 0.76rem; font-weight: 600; color: rgba(255,255,255,0.95);
 }
 
-/* ── 메트릭 카드 */
-div[data-testid="metric-container"] {
-    background: #FFFFFF;
-    border-radius: 16px;
-    padding: 22px 24px !important;
-    border: 1px solid #E8EAF2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    position: relative;
-    overflow: hidden;
+.metric-card {
+    background: #fff; border: 1px solid #E5E7EB;
+    border-radius: 16px; padding: 20px 22px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+    position: relative; overflow: hidden;
 }
-div[data-testid="metric-container"]::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 3px;
-    background: linear-gradient(90deg, #4F46E5, #7C3AED);
+.metric-card::before {
+    content: ''; position: absolute; top: 0; left: 0; right: 0;
+    height: 3px; background: #E5E7EB;
 }
-div[data-testid="metric-container"] label {
-    font-size: 0.72rem !important;
-    font-weight: 700 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 0.8px !important;
-    color: #9CA3AF !important;
+.metric-card-label {
+    font-size: 0.68rem; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 1px; color: #9CA3AF; margin-bottom: 6px;
 }
-div[data-testid="metric-container"] [data-testid="metric-value"] {
-    font-size: 1.8rem !important;
-    font-weight: 800 !important;
-    color: #1A1D2E !important;
-    letter-spacing: -1px !important;
+.metric-card-value {
+    font-size: 1.9rem; font-weight: 800; color: #111827;
+    letter-spacing: -1px; line-height: 1;
 }
 
-/* ── 커스텀 카드 */
-.card {
-    background: #FFFFFF;
-    padding: 24px 28px;
-    border-radius: 16px;
-    border: 1px solid #E8EAF2;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-    margin-bottom: 16px;
+/* 핵심 요약 문장 */
+.summary-bar {
+    background: #EEF2FF; border: 1px solid #C7D2FE;
+    border-radius: 10px; padding: 12px 18px;
+    font-size: 0.88rem; color: #3730A3; font-weight: 500;
+    line-height: 1.6; margin: 14px 0 0;
 }
+.summary-bar b { color: #312E81; }
 
-.card-highlight {
-    background: #FFFFFF;
-    padding: 24px 28px;
-    border-radius: 16px;
-    border: 1px solid #E0E7FF;
-    border-left: 4px solid #4F46E5;
-    box-shadow: 0 2px 8px rgba(79,70,229,0.06);
-    margin-bottom: 16px;
+/* ── 섹션 헤더 */
+.sec-hdr {
+    display: flex; align-items: center; gap: 9px;
+    margin: 28px 0 14px;
 }
+.sec-hdr-icon {
+    width: 30px; height: 30px; background: #EEF2FF;
+    border-radius: 8px; display: flex; align-items: center;
+    justify-content: center; font-size: 14px;
+}
+.sec-hdr-title { font-size: 1rem; font-weight: 700; color: #111827; letter-spacing: -0.2px; }
 
-.card-success {
-    background: #FFFFFF;
-    padding: 24px 28px;
-    border-radius: 16px;
-    border: 1px solid #D1FAE5;
-    border-left: 4px solid #10B981;
-    box-shadow: 0 2px 8px rgba(16,185,129,0.06);
-    margin-bottom: 16px;
+/* ── 차트 코멘트 */
+.cc { background: #F9FAFB; border: 1px solid #E5E7EB; border-left: 3px solid #4F46E5;
+      border-radius: 0 8px 8px 0; padding: 9px 14px;
+      font-size: 0.82rem; color: #374151; line-height: 1.6; margin-top: 5px; }
+.cc-ok  { background: #F0FDF4; border: 1px solid #BBF7D0; border-left: 3px solid #10B981;
+          border-radius: 0 8px 8px 0; padding: 9px 14px;
+          font-size: 0.82rem; color: #065F46; line-height: 1.6; margin-top: 5px; }
+.cc-warn{ background: #FFFBEB; border: 1px solid #FDE68A; border-left: 3px solid #F59E0B;
+          border-radius: 0 8px 8px 0; padding: 9px 14px;
+          font-size: 0.82rem; color: #92400E; line-height: 1.6; margin-top: 5px; }
+
+/* ── 전략 카드 */
+.strat-card-blue {
+    background: #fff; border: 1px solid #E0E7FF; border-left: 4px solid #4F46E5;
+    border-radius: 12px; padding: 20px 22px;
+    box-shadow: 0 1px 6px rgba(79,70,229,0.07); height: 100%;
 }
+.strat-card-green {
+    background: #fff; border: 1px solid #D1FAE5; border-left: 4px solid #10B981;
+    border-radius: 12px; padding: 20px 22px;
+    box-shadow: 0 1px 6px rgba(16,185,129,0.07); height: 100%;
+}
+.strat-label { font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+               letter-spacing: 1.2px; color: #9CA3AF; margin-bottom: 8px; }
+.strat-title { font-size: 0.97rem; font-weight: 700; color: #111827;
+               margin-bottom: 8px; letter-spacing: -0.2px; }
+.strat-body  { font-size: 0.87rem; color: #4B5563; line-height: 1.72; }
+
+/* ── 리뷰 반응 요약 문장 */
+.review-summary {
+    background: #F9FAFB; border: 1px solid #E5E7EB; border-radius: 10px;
+    padding: 14px 18px; margin-top: 10px;
+    font-size: 0.87rem; color: #374151; line-height: 1.65;
+}
+.review-summary b { color: #111827; }
 
 /* ── 태그 */
-.tag {
-    display: inline-flex;
-    align-items: center;
-    background: #EEF2FF;
-    color: #4F46E5;
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    margin-right: 6px;
-    margin-bottom: 4px;
-    letter-spacing: 0.1px;
-}
+.tag  { display:inline-flex; align-items:center; background:#EEF2FF; color:#4F46E5;
+        border-radius:5px; padding:3px 10px; font-size:0.75rem; font-weight:600;
+        margin-right:5px; margin-bottom:3px; }
+.tag-g{ display:inline-flex; align-items:center; background:#F3F4F6; color:#6B7280;
+        border-radius:5px; padding:3px 10px; font-size:0.75rem; font-weight:600;
+        margin-right:5px; margin-bottom:3px; }
 
-.tag-gray {
-    display: inline-flex;
-    align-items: center;
-    background: #F3F4F6;
-    color: #6B7280;
-    border-radius: 6px;
-    padding: 4px 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    margin-right: 6px;
-    margin-bottom: 4px;
-}
+/* ── 시장 포지션 숫자 */
+.pos-num { font-size: 2.4rem; font-weight: 800; color: #4F46E5;
+           letter-spacing: -1.5px; line-height: 1; }
+.pos-lbl { font-size: 0.65rem; font-weight: 700; text-transform: uppercase;
+           letter-spacing: 0.8px; color: #9CA3AF; margin-bottom: 4px; }
 
-/* ── 섹션 레이블 */
-.section-label {
-    font-size: 0.7rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 1.2px;
-    color: #9CA3AF;
-    margin-bottom: 8px;
-}
+/* ── 빈도/ABSA 인라인 테이블 */
+.ftable { width:100%; border-collapse:collapse; font-size:0.84rem; }
+.ftable th { background:#F9FAFB; color:#6B7280; font-weight:700; font-size:0.67rem;
+             text-transform:uppercase; letter-spacing:0.6px;
+             padding:7px 10px; text-align:left; border-bottom:1px solid #E5E7EB; }
+.ftable td { padding:8px 10px; border-bottom:1px solid #F3F4F6;
+             color:#111827; vertical-align:middle; }
+.ftable tr:last-child td { border-bottom:none; }
+.fbar-bg   { background:#EEF2FF; border-radius:3px; height:7px; width:100%; }
+.fbar-fill { background:#4F46E5; border-radius:3px; height:7px; }
+.sp { display:inline-block; border-radius:999px; padding:2px 9px;
+      font-size:0.72rem; font-weight:700; margin:1px; }
 
 /* ── 모델 배지 */
-.model-badge {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #F0FDF4;
-    border: 1px solid #BBF7D0;
-    border-radius: 8px;
-    padding: 5px 12px;
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: #065F46;
-}
+.mbadge { display:inline-flex; align-items:center; gap:5px;
+          background:#F0FDF4; border:1px solid #BBF7D0; border-radius:7px;
+          padding:4px 10px; font-size:0.75rem; font-weight:600; color:#065F46; }
 
-/* ── 전략 카드 내부 */
-.strategy-title {
-    font-size: 1rem;
-    font-weight: 700;
-    color: #1A1D2E;
-    margin-bottom: 8px;
-    letter-spacing: -0.2px;
-}
-.strategy-body {
-    font-size: 0.9rem;
-    color: #4B5563;
-    line-height: 1.7;
-}
-
-/* ── 큰 숫자 */
-.big-number {
-    font-size: 2.6rem;
-    font-weight: 800;
-    color: #4F46E5;
-    letter-spacing: -1.5px;
-    line-height: 1;
-}
-.big-number-label {
-    font-size: 0.72rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    color: #9CA3AF;
-    margin-bottom: 6px;
-}
-
-/* ── 구분선 */
-hr {
-    border: none;
-    border-top: 1px solid #F0F1F8;
-    margin: 20px 0;
-}
-
-/* ── 데이터프레임 */
-[data-testid="stDataFrame"] {
-    border-radius: 12px;
-    overflow: hidden;
-    border: 1px solid #E8EAF2 !important;
-}
-
-/* ── expander */
-.streamlit-expanderHeader {
-    background: #F8F9FC !important;
-    border-radius: 12px !important;
-    border: 1px solid #E8EAF2 !important;
-    font-weight: 600 !important;
-    color: #374151 !important;
-}
-
-/* ── 페이지 섹션 헤더 */
-.page-section {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin: 28px 0 16px;
-}
-.page-section-icon {
-    width: 32px; height: 32px;
-    background: #EEF2FF;
-    border-radius: 8px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 15px;
-}
-.page-section-title {
-    font-size: 1.05rem;
-    font-weight: 700;
-    color: #1A1D2E;
-    letter-spacing: -0.3px;
-}
-
-/* ── 대기 화면 feature 그리드 */
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-    margin-top: 24px;
-}
-.feature-item {
-    background: #F8F9FC;
-    border: 1px solid #E8EAF2;
-    border-radius: 12px;
-    padding: 20px;
-    text-align: left;
-}
-.feature-item-icon {
-    font-size: 1.5rem;
-    margin-bottom: 10px;
-}
-.feature-item-title {
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: #1A1D2E;
-    margin-bottom: 4px;
-}
-.feature-item-desc {
-    font-size: 0.8rem;
-    color: #6B7280;
-    line-height: 1.5;
-}
-
-/* divider */
-.stDivider { border-color: #F0F1F8 !important; }
-
+/* ── misc */
+[data-testid="stDataFrame"] { border-radius:10px; overflow:hidden; border:1px solid #E5E7EB !important; }
+.stDivider { border-color:#F3F4F6 !important; }
+h1,h2,h3 { color:#111827 !important; }
 </style>
 """, unsafe_allow_html=True)
 
 
 # =========================================================
-# 데이터 + 모델 캐싱
+# 데이터 + 모델
 # =========================================================
 @st.cache_data(show_spinner=False)
 def load_and_preprocess():
     df = pd.read_csv("amazon.csv")
 
     def clean_col(s, chars):
-        result = s.astype(str)
-        for c in chars:
-            result = result.str.replace(c, '', regex=False)
-        return result
+        r = s.astype(str)
+        for c in chars: r = r.str.replace(c, '', regex=False)
+        return r
 
-    df['actual_price']        = pd.to_numeric(clean_col(df['actual_price'], ['₹', ',']), errors='coerce')
-    df['discounted_price']    = pd.to_numeric(clean_col(df['discounted_price'], ['₹', ',']), errors='coerce')
-    df['discount_percentage'] = pd.to_numeric(clean_col(df['discount_percentage'], ['%']), errors='coerce')
-    df['rating']              = pd.to_numeric(df['rating'], errors='coerce')
-    df['rating_count']        = pd.to_numeric(clean_col(df['rating_count'], [',']), errors='coerce')
+    df['actual_price']        = pd.to_numeric(clean_col(df['actual_price'],        ['₹',',']), errors='coerce')
+    df['discounted_price']    = pd.to_numeric(clean_col(df['discounted_price'],    ['₹',',']), errors='coerce')
+    df['discount_percentage'] = pd.to_numeric(clean_col(df['discount_percentage'], ['%']),     errors='coerce')
+    df['rating']              = pd.to_numeric(df['rating'],                                    errors='coerce')
+    df['rating_count']        = pd.to_numeric(clean_col(df['rating_count'],        [',']),     errors='coerce')
 
     df['main_category'] = df['category'].astype(str).str.split('|').str[0]
     cat_map = {
-        "Computers&Accessories": "💻 Computer",
-        "Electronics": "🎧 Electronics",
-        "Home&Kitchen": "🏠 Home",
-        "OfficeProducts": "🖨 Office",
-        "MusicalInstruments": "🎵 Music",
-        "Health&PersonalCare": "💖 Health",
-        "HomeImprovement": "🛠 Tools",
-        "Toys&Games": "🧸 Toys"
+        "Computers&Accessories":"💻 Computer","Electronics":"🎧 Electronics",
+        "Home&Kitchen":"🏠 Home","OfficeProducts":"🖨 Office",
+        "MusicalInstruments":"🎵 Music","Health&PersonalCare":"💖 Health",
+        "HomeImprovement":"🛠 Tools","Toys&Games":"🧸 Toys"
     }
     df['display_category'] = df['main_category'].map(cat_map).fillna("✨ Other")
 
-    df = df.dropna(subset=[
-        'product_name', 'actual_price', 'discount_percentage',
-        'rating', 'rating_count', 'display_category',
-        'about_product', 'review_title', 'review_content'
-    ]).reset_index(drop=True)
+    df = df.dropna(subset=['product_name','actual_price','discount_percentage',
+                            'rating','rating_count','display_category',
+                            'about_product','review_title','review_content']).reset_index(drop=True)
 
     def price_level(row):
-        prices = df.loc[df['main_category'] == row['main_category'], 'actual_price']
-        q1, q2 = prices.quantile(0.33), prices.quantile(0.66)
-        if row['actual_price'] <= q1:   return 'Low'
-        elif row['actual_price'] <= q2: return 'Medium'
-        else:                           return 'High'
+        p = df.loc[df['main_category']==row['main_category'],'actual_price']
+        q1,q2 = p.quantile(0.33), p.quantile(0.66)
+        return 'Low' if row['actual_price']<=q1 else ('Medium' if row['actual_price']<=q2 else 'High')
 
-    df['price_level'] = df.apply(price_level, axis=1)
-    df['log_rating_count'] = np.log1p(df['rating_count'])
-    df['price_discount_interaction'] = df['actual_price'] * df['discount_percentage']
-    df['consumer_score'] = df['rating'] * np.log1p(df['rating_count'])
-    df['combined_text'] = (
-        df['product_name'].fillna('') + ' ' +
-        df['about_product'].fillna('') + ' ' +
-        df['display_category'].fillna('')
-    )
+    df['price_level']                  = df.apply(price_level, axis=1)
+    df['log_rating_count']             = np.log1p(df['rating_count'])
+    df['price_discount_interaction']   = df['actual_price'] * df['discount_percentage']
+    df['consumer_score']               = df['rating'] * np.log1p(df['rating_count'])
+    df['combined_text'] = (df['product_name'].fillna('')+' '+
+                           df['about_product'].fillna('')+' '+
+                           df['display_category'].fillna(''))
     return df
 
 
 @st.cache_resource(show_spinner=False)
 def train_models(df):
-    numeric_pipe = Pipeline([('imputer', SimpleImputer(strategy='median')), ('scaler', StandardScaler())])
-    categorical_pipe = Pipeline([('imputer', SimpleImputer(strategy='most_frequent')), ('onehot', OneHotEncoder(handle_unknown='ignore'))])
+    np_ = Pipeline([('i',SimpleImputer(strategy='median')),('s',StandardScaler())])
+    cp_ = Pipeline([('i',SimpleImputer(strategy='most_frequent')),('o',OneHotEncoder(handle_unknown='ignore'))])
 
-    # 모델 1: log 리뷰 수 예측
-    feat_r  = ['actual_price', 'discount_percentage', 'price_discount_interaction', 'main_category', 'price_level', 'rating']
-    num_r   = ['actual_price', 'discount_percentage', 'price_discount_interaction', 'rating']
-    cat_r   = ['main_category', 'price_level']
-    pre_r   = ColumnTransformer([('num', numeric_pipe, num_r), ('cat', categorical_pipe, cat_r)])
-    model_r = Pipeline([('pre', pre_r), ('reg', GradientBoostingRegressor(n_estimators=100, random_state=42))])
-    X_r, y_r = df[feat_r], df['log_rating_count']
-    Xr_tr, Xr_te, yr_tr, yr_te = train_test_split(X_r, y_r, test_size=0.2, random_state=42)
-    model_r.fit(Xr_tr, yr_tr)
-    r2_r = r2_score(yr_te, model_r.predict(Xr_te))
+    def fit(feat,num,cat,y_col):
+        pre = ColumnTransformer([('n',np_,num),('c',cp_,cat)])
+        mdl = Pipeline([('p',pre),('r',GradientBoostingRegressor(n_estimators=100,random_state=42))])
+        X,y = df[feat], df[y_col]
+        Xtr,Xte,ytr,yte = train_test_split(X,y,test_size=0.2,random_state=42)
+        mdl.fit(Xtr,ytr)
+        return mdl, round(r2_score(yte,mdl.predict(Xte)),3)
 
-    # 모델 2: 평점 예측
-    feat_rt  = ['actual_price', 'discount_percentage', 'price_discount_interaction', 'main_category', 'price_level']
-    num_rt   = ['actual_price', 'discount_percentage', 'price_discount_interaction']
-    cat_rt   = ['main_category', 'price_level']
-    pre_rt   = ColumnTransformer([('num', numeric_pipe, num_rt), ('cat', categorical_pipe, cat_rt)])
-    model_rt = Pipeline([('pre', pre_rt), ('reg', GradientBoostingRegressor(n_estimators=100, random_state=42))])
-    X_rt, y_rt = df[feat_rt], df['rating']
-    Xrt_tr, Xrt_te, yrt_tr, yrt_te = train_test_split(X_rt, y_rt, test_size=0.2, random_state=42)
-    model_rt.fit(Xrt_tr, yrt_tr)
-    r2_rt = r2_score(yrt_te, model_rt.predict(Xrt_te))
-
-    return model_r, model_rt, round(r2_r, 3), round(r2_rt, 3)
+    mr,r2r = fit(
+        ['actual_price','discount_percentage','price_discount_interaction','main_category','price_level','rating'],
+        ['actual_price','discount_percentage','price_discount_interaction','rating'],
+        ['main_category','price_level'], 'log_rating_count')
+    mrt,r2rt = fit(
+        ['actual_price','discount_percentage','price_discount_interaction','main_category','price_level'],
+        ['actual_price','discount_percentage','price_discount_interaction'],
+        ['main_category','price_level'], 'rating')
+    return mr, mrt, r2r, r2rt
 
 
 @st.cache_resource(show_spinner=False)
 def build_tfidf(df):
-    vec = TfidfVectorizer(stop_words='english', max_features=8000)
-    mat = vec.fit_transform(df['combined_text'])
-    return vec, mat
+    v = TfidfVectorizer(stop_words='english', max_features=8000)
+    m = v.fit_transform(df['combined_text'])
+    return v, m
 
 
 # =========================================================
 # ABSA
 # =========================================================
-ASPECT_KEYWORDS = {
-    '가격/가성비': ['price', 'cheap', 'expensive', 'value', 'worth', 'budget', 'cost'],
-    '품질':        ['quality', 'durable', 'material', 'build', 'sturdy'],
-    '배송/포장':   ['delivery', 'shipping', 'package', 'packing', 'arrived'],
-    '사용성':      ['easy', 'comfortable', 'convenient', 'install', 'simple'],
-    '디자인':      ['design', 'look', 'style', 'color', 'appearance'],
-    '성능':        ['performance', 'fast', 'battery', 'sound', 'noise', 'power', 'speed']
+AK = {
+    '가격/가성비':['price','cheap','expensive','value','worth','budget','cost'],
+    '품질':       ['quality','durable','material','build','sturdy'],
+    '배송/포장':  ['delivery','shipping','package','packing','arrived'],
+    '사용성':     ['easy','comfortable','convenient','install','simple'],
+    '디자인':     ['design','look','style','color','appearance'],
+    '성능':       ['performance','fast','battery','sound','noise','power','speed']
 }
-POSITIVE_WORDS = ['good','great','excellent','amazing','fast','love','perfect','easy',
-                  'comfortable','nice','best','awesome','satisfied','worth','happy']
-NEGATIVE_WORDS = ['bad','poor','terrible','worst','slow','hate','broken','problem',
-                  'difficult','hard','noise','damaged','waste','issue','disappoint']
+PW = ['good','great','excellent','amazing','fast','love','perfect','easy',
+      'comfortable','nice','best','awesome','satisfied','worth','happy']
+NW = ['bad','poor','terrible','worst','slow','hate','broken','problem',
+      'difficult','hard','noise','damaged','waste','issue','disappoint']
 
-def run_absa(products_df):
-    rows = []
-    for _, row in products_df.iterrows():
-        text = (str(row['review_title']) + ' ' + str(row['review_content'])).lower().split()
-        for aspect, keywords in ASPECT_KEYWORDS.items():
-            pos, neg = 0, 0
-            for kw in keywords:
-                for i, w in enumerate(text):
+def run_absa(pdf):
+    rows=[]
+    for _,row in pdf.iterrows():
+        txt=(str(row['review_title'])+' '+str(row['review_content'])).lower().split()
+        for asp,kws in AK.items():
+            pos=neg=0
+            for kw in kws:
+                for i,w in enumerate(txt):
                     if kw in w:
-                        window = text[max(0, i-3): min(len(text), i+4)]
-                        for nw in window:
-                            if nw in POSITIVE_WORDS: pos += 1
-                            elif nw in NEGATIVE_WORDS: neg += 1
-            total = pos + neg
-            if total > 0:
-                sentiment = '긍정' if pos > neg else ('부정' if neg > pos else '중립')
-                rows.append([aspect, sentiment, total])
-    if not rows:
-        return pd.DataFrame(columns=['속성','감정','언급 횟수'])
-    return pd.DataFrame(rows, columns=['속성','감정','언급 횟수'])
+                        win=txt[max(0,i-3):min(len(txt),i+4)]
+                        for nw in win:
+                            if nw in PW: pos+=1
+                            elif nw in NW: neg+=1
+            tot=pos+neg
+            if tot>0:
+                sent='긍정' if pos>neg else ('부정' if neg>pos else '중립')
+                rows.append([asp,sent,tot,pos,neg])
+    if not rows: return pd.DataFrame(columns=['속성','감정','언급 횟수','긍정','부정'])
+    return pd.DataFrame(rows,columns=['속성','감정','언급 횟수','긍정','부정'])
 
 
 # =========================================================
-# 할인율 시뮬레이션
+# 시뮬레이션
 # =========================================================
-def simulate_discounts(model_r, model_rt, actual_price, main_category, price_level):
-    results = []
-    for d in range(0, 51, 5):
-        interaction = actual_price * d
-        rt_in = pd.DataFrame({'actual_price':[actual_price],'discount_percentage':[d],
-                               'price_discount_interaction':[interaction],
-                               'main_category':[main_category],'price_level':[price_level]})
-        pred_rt = float(np.clip(model_rt.predict(rt_in)[0], 1, 5))
-        rv_in = pd.DataFrame({'actual_price':[actual_price],'discount_percentage':[d],
-                               'price_discount_interaction':[interaction],
-                               'main_category':[main_category],'price_level':[price_level],
-                               'rating':[pred_rt]})
-        pred_rv = max(0, int(np.expm1(model_r.predict(rv_in)[0])))
-        results.append([d, int(actual_price*(1-d/100)), round(pred_rt,2), pred_rv])
-
-    sim = pd.DataFrame(results, columns=['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수'])
-    sim['리뷰수_정규화'] = sim['예상 리뷰 수'] / (sim['예상 리뷰 수'].max() + 1e-9)
-    sim['평점_정규화']   = sim['예상 평점'] / 5
-    sim['예상매출지표']  = sim['할인 후 가격'] * sim['예상 리뷰 수']
-    sim['매출_정규화']   = sim['예상매출지표'] / (sim['예상매출지표'].max() + 1e-9)
-    sim['추천점수']      = sim['평점_정규화']*0.3 + sim['리뷰수_정규화']*0.3 + sim['매출_정규화']*0.4
-    return sim
+def simulate(mr, mrt, price, mc, pl):
+    res=[]
+    for d in range(0,51,5):
+        ix=price*d
+        ri=pd.DataFrame({'actual_price':[price],'discount_percentage':[d],
+                         'price_discount_interaction':[ix],'main_category':[mc],'price_level':[pl]})
+        rt=float(np.clip(mrt.predict(ri)[0],1,5))
+        rvi=pd.DataFrame({'actual_price':[price],'discount_percentage':[d],
+                          'price_discount_interaction':[ix],'main_category':[mc],
+                          'price_level':[pl],'rating':[rt]})
+        rv=max(0,int(np.expm1(mr.predict(rvi)[0])))
+        res.append([d,int(price*(1-d/100)),round(rt,1),rv])
+    s=pd.DataFrame(res,columns=['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수'])
+    s['리뷰수_N'] = s['예상 리뷰 수']/(s['예상 리뷰 수'].max()+1e-9)
+    s['평점_N']   = s['예상 평점']/5
+    s['매출지표'] = s['할인 후 가격']*s['예상 리뷰 수']
+    s['매출_N']   = s['매출지표']/(s['매출지표'].max()+1e-9)
+    s['추천점수'] = ((s['평점_N']*0.3+s['리뷰수_N']*0.3+s['매출_N']*0.4)*100).round(1)
+    return s
 
 
 # =========================================================
 # 전략 텍스트
 # =========================================================
-ASPECT_COMMENTS = {
-    '가격/가성비': ('가성비 강조 전략', '유사 상품 리뷰에서 가격 대비 만족도 언급이 가장 많았습니다. 상세페이지에서 가성비와 할인 혜택을 전면에 내세우는 것이 효과적입니다.'),
-    '품질':        ('품질 신뢰성 전략', '소비자들이 내구성·완성도를 중점적으로 언급했습니다. 인증 자료나 소재 정보를 상세페이지 상단에 배치하세요.'),
-    '배송/포장':   ('물류 경쟁력 전략', '배송 속도·포장 상태에 대한 반응이 높았습니다. 빠른 배송과 안전 포장을 마케팅 핵심 메시지로 활용하세요.'),
-    '사용성':      ('편의성 소구 전략', '사용 편의성과 직관적 조작법에 대한 언급이 많았습니다. 사용 가이드 영상이나 간편 설치 포인트를 강조하세요.'),
-    '디자인':      ('비주얼 마케팅 전략', '디자인·외형 관련 피드백이 높게 나타났습니다. 감성적인 제품 연출 이미지와 색상 다양성을 전면에 배치하세요.'),
-    '성능':        ('스펙 중심 전략', '성능 관련 언급이 가장 강했습니다. 배터리, 속도, 출력 등 핵심 스펙을 수치와 함께 소구하는 전략이 유리합니다.')
+AC = {
+    '가격/가성비':('가성비 강조 전략','유사 상품 리뷰에서 가격 대비 만족도 언급이 가장 많았습니다. 상세페이지에서 가성비와 할인 혜택을 전면에 내세우는 것이 효과적입니다.'),
+    '품질':       ('품질 신뢰성 전략','소비자들이 내구성·완성도를 중점적으로 언급했습니다. 인증 자료나 소재 정보를 상세페이지 상단에 배치하세요.'),
+    '배송/포장':  ('물류 경쟁력 전략','배송 속도·포장 상태에 대한 반응이 높았습니다. 빠른 배송과 안전 포장을 마케팅 핵심 메시지로 활용하세요.'),
+    '사용성':     ('편의성 소구 전략','사용 편의성과 직관적 조작법에 대한 언급이 많았습니다. 사용 가이드 영상이나 간편 설치 포인트를 강조하세요.'),
+    '디자인':     ('비주얼 마케팅 전략','디자인·외형 관련 피드백이 높게 나타났습니다. 감성적인 제품 연출 이미지와 색상 다양성을 전면에 배치하세요.'),
+    '성능':       ('스펙 중심 전략','성능 관련 언급이 가장 강했습니다. 배터리, 속도, 출력 등 핵심 스펙을 수치와 함께 소구하는 전략이 유리합니다.')
 }
 
-def get_discount_strategy(d):
-    if d <= 10:
-        return ('수익성 유지형', '낮은 할인율에서도 평점·리뷰가 안정적으로 유지됩니다. 과도한 할인보다 마진 방어에 집중하는 것이 유리합니다.')
-    elif d <= 20:
-        return ('균형형', '중간 할인율에서 리뷰 수·평점·매출의 밸런스가 최적화됩니다. 가격 경쟁력과 마진을 동시에 확보하는 전략입니다.')
+def discount_strat(d):
+    if d<=10:  return '수익성 유지형','낮은 할인율에서도 평점·리뷰가 안정적으로 유지됩니다. 과도한 할인보다 마진 방어에 집중하는 것이 유리합니다.'
+    elif d<=20: return '균형형','중간 할인율에서 리뷰 수·평점·매출의 밸런스가 최적화됩니다. 가격 경쟁력과 마진을 동시에 확보하는 전략입니다.'
+    else:       return '공격형 프로모션','높은 할인율에서 리뷰 유입 효과가 크게 나타납니다. 단기 노출 확대와 리뷰 대량 확보를 목표로 한 전략에 적합합니다.'
+
+
+# =========================================================
+# 핵심 요약 문장
+# =========================================================
+def make_summary(best, sim):
+    d  = int(best['할인율(%)'])
+    rv = int(best['예상 리뷰 수'])
+    rt = best['예상 평점']
+    sc = best['추천점수']
+    rv0 = int(sim.loc[sim['할인율(%)']==0,'예상 리뷰 수'].values[0])
+    delta = rv - rv0
+    delta_txt = f"할인 없을 때보다 리뷰 <b>{delta:+,}개</b> 차이," if delta != 0 else ""
+    return (f"현재 상품은 <b>{d}% 할인</b> 시 예상 리뷰 수·평점·매출 지표가 가장 균형적입니다. "
+            f"{delta_txt} 예상 평점 <b>{rt:.1f}점</b>으로 추천점수 <b>{sc:.1f}점</b>을 기록합니다.")
+
+
+# =========================================================
+# 리뷰 반응 요약 문장
+# =========================================================
+def make_review_summary(top_aspect, kw_df):
+    top2 = kw_df.head(2)['속성'].tolist()
+    t2_str = "·".join(f"'{a}'" for a in top2)
+    detail = {
+        '가격/가성비': '상세페이지에서 가격 경쟁력과 할인 혜택을 함께 강조하는 것이 좋습니다.',
+        '품질':        '내구성·소재 품질을 증명하는 인증 자료나 사용자 후기를 전면에 내세우세요.',
+        '배송/포장':   '빠른 배송 일정과 안전 포장 정보를 상세페이지 상단에 배치하세요.',
+        '사용성':      '간편한 설치 방법이나 사용 튜토리얼 콘텐츠를 제공하면 전환율이 높아집니다.',
+        '디자인':      '고품질 제품 연출 이미지와 색상·디자인 다양성을 강조하세요.',
+        '성능':        '배터리 타임, 처리 속도 등 핵심 스펙을 수치와 함께 비교 표로 보여주세요.'
+    }
+    return (f"이 상품군에서는 {t2_str} 관련 언급이 가장 많습니다. "
+            f"{detail.get(top_aspect,'관련 강점을 상세페이지에 적극 활용하세요.')}")
+
+
+# =========================================================
+# 차트 코멘트
+# =========================================================
+def cc_review(sim, best):
+    d  = int(best['할인율(%)'])
+    rv = int(best['예상 리뷰 수'])
+    rv0= int(sim.loc[sim['할인율(%)']==0,'예상 리뷰 수'].values[0])
+    delta = rv - rv0
+    if d==0:
+        return 'cc','할인 없이도 리뷰 유입이 안정적입니다. 불필요한 할인을 줄이고 상세페이지 품질에 집중하세요.'
+    elif delta>0:
+        return 'cc-ok',f'<b>{d}% 할인</b> 시 리뷰가 할인 없을 때보다 약 <b>{delta:,}개</b> 더 많이 예측됩니다. 이 구간까지 할인이 소비자 유입에 효과적입니다.'
     else:
-        return ('공격형 프로모션', '높은 할인율에서 리뷰 유입 효과가 크게 나타납니다. 단기 노출 확대와 리뷰 대량 확보를 목표로 한 전략에 적합합니다.')
+        return 'cc-warn','할인율을 높여도 리뷰 수 증가 효과가 작습니다. 노출 전략이나 상세페이지 개선을 병행하세요.'
+
+def cc_rating(sim, best):
+    d  = int(best['할인율(%)'])
+    rt = best['예상 평점']
+    diff = round(sim['예상 평점'].max()-sim['예상 평점'].min(),1)
+    if diff<0.1:
+        return 'cc','할인율 변화에 따른 평점 차이가 미미합니다. 평점은 상품 자체의 품질에 더 크게 좌우됩니다.'
+    elif rt>=4.0:
+        return 'cc-ok',f'<b>{d}% 할인</b> 구간에서 예상 평점 <b>{rt:.1f}점</b>으로 소비자 만족도가 최적화됩니다.'
+    else:
+        return 'cc-warn',f'최고 예상 평점이 {rt:.1f}점으로 낮은 편입니다. 상품 품질 개선이나 상세페이지 보완을 권장합니다.'
+
+def cc_score(best):
+    d=int(best['할인율(%)']); s=best['추천점수']
+    if d<=10:   return 'cc',f'<b>{d}%</b>의 낮은 할인율에서 추천점수 <b>{s:.1f}점</b>으로 최고입니다. 마진을 지키면서도 충분한 소비자 반응을 기대할 수 있습니다.'
+    elif d<=25: return 'cc-ok',f'<b>{d}% 할인</b>이 추천점수 <b>{s:.1f}점</b>으로 평점·리뷰·매출의 균형이 가장 좋습니다.'
+    else:       return 'cc-warn',f'<b>{d}%</b>의 높은 할인율이 최적입니다. 단기 리뷰 확보 목적에는 유효하지만, 마진 훼손 가능성을 반드시 검토하세요.'
+
+def cc_scatter(pp, rp):
+    if pp>70 and rp>50: return 'cc-ok', f'가격 상위 {pp:.0f}% 구간이지만 예상 리뷰도 상위 {rp:.0f}% 수준입니다. 프리미엄 포지셔닝을 유지하면서 리뷰 관리에 집중하세요.'
+    elif pp>70:         return 'cc-warn',f'가격이 시장 상위 {pp:.0f}%로 높은 편입니다. 프리미엄 이미지 강화 또는 소비자 체감 가치를 높이는 전략이 필요합니다.'
+    else:               return 'cc',    f'가격 경쟁력이 있는 구간(하위 {100-pp:.0f}%)에 위치합니다. 가성비를 전면에 내세우는 마케팅이 효과적입니다.'
 
 
 # =========================================================
-# 차트 — 라이트 테마
+# 차트
 # =========================================================
-C = {
-    'indigo':  '#4F46E5',
-    'violet':  '#7C3AED',
-    'red':     '#EF4444',
-    'green':   '#10B981',
-    'gray':    '#E5E7EB',
-    'text':    '#1A1D2E',
-    'subtext': '#6B7280',
-    'grid':    '#F3F4F6',
-    'bg':      '#FFFFFF',
-}
+C={'i':'#4F46E5','v':'#7C3AED','r':'#EF4444','g':'#10B981',
+   'gy':'#E5E7EB','t':'#111827','st':'#6B7280','gr':'#F3F4F6','bg':'#FFFFFF'}
+MB=dict(displaylogo=False,scrollZoom=True,
+        modeBarButtonsToRemove=['zoom2d','select2d','lasso2d','zoomIn2d','zoomOut2d',
+                                'autoScale2d','hoverClosestCartesian','hoverCompareCartesian',
+                                'toggleSpikelines','toImage'],
+        modeBarButtonsToAdd=['pan2d','resetScale2d'], displayModeBar=True)
+CL=dict(paper_bgcolor=C['bg'],plot_bgcolor=C['bg'],
+        font=dict(family='Inter, sans-serif',color=C['t']),
+        margin=dict(l=14,r=14,t=48,b=28),
+        hoverlabel=dict(bgcolor='white',font_size=13,font_family='Inter'))
 
-CHART_LAYOUT = dict(
-    paper_bgcolor=C['bg'], plot_bgcolor=C['bg'],
-    font=dict(family='Inter, sans-serif', color=C['text']),
-    margin=dict(l=16, r=16, t=48, b=24),
-    hoverlabel=dict(bgcolor='white', font_size=13, font_family='Inter'),
-)
-
-def line_chart(x, y, title, xlab, ylab, best_x=None, fmt='int'):
-    fig = go.Figure()
-    # 영역 채우기
-    fig.add_trace(go.Scatter(
-        x=x, y=y, fill='tozeroy',
-        fillcolor='rgba(79,70,229,0.07)',
-        line=dict(color=C['indigo'], width=0),
-        showlegend=False, hoverinfo='skip'
-    ))
-    fig.add_trace(go.Scatter(
-        x=x, y=y, mode='lines+markers',
-        line=dict(color=C['indigo'], width=2.5),
-        marker=dict(size=8, color='white', line=dict(color=C['indigo'], width=2.5)),
-        text=[f"{v:,}" if fmt=='int' else f"{v:.2f}" for v in y],
-        textposition='top center',
-        textfont=dict(size=10, color=C['subtext']),
-        hovertemplate=f'<b>%{{x}}%</b><br>{ylab}: %{{y}}<extra></extra>',
-        name=ylab
-    ))
-    if best_x is not None:
-        fig.add_vline(x=best_x, line_dash='dot', line_color=C['red'], line_width=1.8,
-                      annotation_text=f"  추천 {best_x}%",
-                      annotation_font=dict(color=C['red'], size=12, family='Inter'))
-    fig.update_layout(
-        title=dict(text=title, font=dict(size=14, weight=700, color=C['text'])),
-        xaxis=dict(title=xlab, gridcolor=C['grid'], showgrid=True, zeroline=False,
-                   tickfont=dict(size=11)),
-        yaxis=dict(title=ylab, gridcolor=C['grid'], showgrid=True, zeroline=False,
-                   tickfont=dict(size=11)),
-        showlegend=False, height=300,
-        **CHART_LAYOUT
-    )
+def lc(x,y,title,xl,yl,bx=None,fmt='int'):
+    ya=list(y); ym=max(ya) if ya else 1
+    fig=go.Figure()
+    fig.add_trace(go.Scatter(x=x,y=y,fill='tozeroy',fillcolor='rgba(79,70,229,0.07)',
+                              line=dict(color=C['i'],width=0),showlegend=False,hoverinfo='skip'))
+    fig.add_trace(go.Scatter(x=x,y=y,mode='lines+markers+text',
+                              line=dict(color=C['i'],width=2.5),
+                              marker=dict(size=8,color='white',line=dict(color=C['i'],width=2.5)),
+                              text=[f"{v:,}" if fmt=='int' else f"{v:.1f}" for v in ya],
+                              textposition='top center',textfont=dict(size=10,color=C['st']),
+                              hovertemplate=f'<b>%{{x}}%</b><br>{yl}: %{{y}}<extra></extra>',name=yl))
+    if bx is not None:
+        fig.add_vline(x=bx,line_dash='dot',line_color=C['r'],line_width=1.8,
+                      annotation_text=f"  추천 {bx}%",annotation_position="top right",
+                      annotation_font=dict(color=C['r'],size=12,family='Inter'))
+    fig.update_layout(title=dict(text=title,font=dict(size=13,color=C['t']),x=0,xanchor='left'),
+                      xaxis=dict(title=xl,gridcolor=C['gr'],showgrid=True,zeroline=False,tickfont=dict(size=10)),
+                      yaxis=dict(title=yl,gridcolor=C['gr'],showgrid=True,zeroline=False,
+                                 tickfont=dict(size=10),range=[0,ym*1.22]),
+                      showlegend=False,height=290,**CL)
     return fig
 
-def bar_score_chart(x, y, best_x):
-    colors = [C['indigo'] if xi == best_x else C['gray'] for xi in x]
-    fig = go.Figure(go.Bar(
-        x=[str(v) for v in x], y=y,
-        marker=dict(color=colors, line=dict(width=0), cornerradius=6),
-        text=[f"{v:.3f}" for v in y],
-        textposition='outside',
-        textfont=dict(size=10, color=C['subtext']),
-        hovertemplate='할인율 %{x}%<br>추천점수: %{y:.3f}<extra></extra>'
-    ))
-    fig.update_layout(
-        title=dict(text='할인율별 종합 추천점수', font=dict(size=14, weight=700, color=C['text'])),
-        xaxis=dict(title='할인율(%)', gridcolor=C['grid'], zeroline=False, tickfont=dict(size=11)),
-        yaxis=dict(title='추천점수', gridcolor=C['grid'], showgrid=True, zeroline=False,
-                   tickfont=dict(size=11)),
-        height=300,
-        **CHART_LAYOUT
-    )
+def bc(x,y,bx):
+    colors=[C['i'] if xi==bx else C['gy'] for xi in x]
+    ym=max(y) if len(y) else 100
+    fig=go.Figure(go.Bar(x=[str(v) for v in x],y=y,
+                          marker=dict(color=colors,line=dict(width=0),cornerradius=5),
+                          text=[f"{v:.1f}점" for v in y],textposition='outside',
+                          textfont=dict(size=10,color=C['st']),
+                          hovertemplate='할인율 %{x}%<br>추천점수: %{y:.1f}점<extra></extra>'))
+    fig.update_layout(title=dict(text='할인율별 종합 추천점수 (100점 만점)',font=dict(size=13,color=C['t']),x=0,xanchor='left'),
+                      xaxis=dict(title='할인율(%)',gridcolor=C['gr'],zeroline=False,tickfont=dict(size=10)),
+                      yaxis=dict(title='추천점수 (점)',gridcolor=C['gr'],showgrid=True,zeroline=False,
+                                 tickfont=dict(size=10),range=[0,ym*1.2]),
+                      height=290,**CL)
     return fig
 
-def absa_chart(absa_df):
-    if absa_df.empty:
-        return None
-    pivot = absa_df.groupby(['속성','감정'])['언급 횟수'].sum().reset_index()
-    color_map = {'긍정': C['indigo'], '중립': '#A5B4FC', '부정': C['red']}
-    fig = px.bar(pivot, x='속성', y='언급 횟수', color='감정', barmode='stack',
-                 color_discrete_map=color_map)
-    fig.update_traces(marker_line_width=0)
-    fig.update_layout(
-        title=dict(text='속성별 소비자 반응 (ABSA)', font=dict(size=14, weight=700, color=C['text'])),
-        xaxis=dict(gridcolor=C['grid'], zeroline=False, tickfont=dict(size=11)),
-        yaxis=dict(gridcolor=C['grid'], showgrid=True, zeroline=False, tickfont=dict(size=11)),
-        legend=dict(title='', font=dict(size=11), orientation='h', y=1.1),
-        height=300,
-        **CHART_LAYOUT
-    )
+def ac(adf):
+    if adf.empty: return None
+    pv=adf.groupby(['속성','감정'])['언급 횟수'].sum().reset_index()
+    cm={'긍정':C['i'],'중립':'#A5B4FC','부정':C['r']}
+    fig=px.bar(pv,x='속성',y='언급 횟수',color='감정',barmode='stack',
+               color_discrete_map=cm,text='언급 횟수')
+    fig.update_traces(marker_line_width=0,textfont_size=10,textposition='inside',insidetextanchor='middle')
+    fig.update_layout(title=dict(text='속성별 소비자 반응',font=dict(size=13,color=C['t']),x=0,xanchor='left'),
+                      xaxis=dict(gridcolor=C['gr'],zeroline=False,tickfont=dict(size=10)),
+                      yaxis=dict(gridcolor=C['gr'],showgrid=True,zeroline=False,tickfont=dict(size=10)),
+                      legend=dict(title='',font=dict(size=10),orientation='h',y=1.14),
+                      height=290,**CL)
     return fig
 
-def kw_chart(kw_df):
-    df_s = kw_df.sort_values('언급 횟수')
-    fig = go.Figure(go.Bar(
-        x=df_s['언급 횟수'], y=df_s['속성'], orientation='h',
-        marker=dict(
-            color=df_s['언급 횟수'],
-            colorscale=[[0,'#E0E7FF'],[1,C['indigo']]],
-            line=dict(width=0),
-        ),
-        hovertemplate='%{y}: %{x}회<extra></extra>'
-    ))
-    fig.update_layout(
-        title=dict(text='속성별 언급 빈도', font=dict(size=14, weight=700, color=C['text'])),
-        xaxis=dict(gridcolor=C['grid'], showgrid=True, zeroline=False, tickfont=dict(size=11)),
-        yaxis=dict(gridcolor=C['grid'], zeroline=False, tickfont=dict(size=11)),
-        height=300,
-        **CHART_LAYOUT
-    )
+def kc(kdf):
+    ds=kdf.sort_values('언급 횟수')
+    xm=ds['언급 횟수'].max() if len(ds) else 10
+    fig=go.Figure(go.Bar(x=ds['언급 횟수'],y=ds['속성'],orientation='h',
+                          marker=dict(color=ds['언급 횟수'],colorscale=[[0,'#E0E7FF'],[1,C['i']]],line=dict(width=0)),
+                          text=[f"  {v}회" for v in ds['언급 횟수']],textposition='outside',
+                          textfont=dict(size=10,color=C['st']),
+                          hovertemplate='%{y}: %{x}회<extra></extra>'))
+    fig.update_layout(title=dict(text='속성별 언급 빈도',font=dict(size=13,color=C['t']),x=0,xanchor='left'),
+                      xaxis=dict(gridcolor=C['gr'],showgrid=True,zeroline=False,
+                                 tickfont=dict(size=10),range=[0,xm*1.28]),
+                      yaxis=dict(gridcolor=C['gr'],zeroline=False,tickfont=dict(size=10)),
+                      height=290,**CL)
     return fig
 
-def scatter_chart(df, input_price, pred_log_rv):
-    fig = go.Figure()
-    fig.add_trace(go.Scatter(
-        x=df['actual_price'], y=df['log_rating_count'],
-        mode='markers',
-        marker=dict(size=5, color=df['rating'], colorscale='Blues',
-                    opacity=0.4, showscale=True,
-                    colorbar=dict(title='평점', thickness=10, len=0.8)),
-        hovertemplate='가격: ₹%{x:,}<br>log(리뷰 수): %{y:.2f}<extra></extra>',
-        name='전체 상품'
-    ))
-    fig.add_trace(go.Scatter(
-        x=[input_price], y=[pred_log_rv],
-        mode='markers',
-        marker=dict(size=18, symbol='star', color=C['red'],
-                    line=dict(color='white', width=2)),
-        name='선택 상품',
-        hovertemplate='선택 상품<br>가격: ₹%{x:,}<br>log(리뷰 수): %{y:.2f}<extra></extra>'
-    ))
-    fig.update_layout(
-        title=dict(text='시장 내 상품 포지션', font=dict(size=14, weight=700, color=C['text'])),
-        xaxis=dict(title='가격 (₹)', gridcolor=C['grid'], showgrid=True, zeroline=False),
-        yaxis=dict(title='log(리뷰 수 + 1)', gridcolor=C['grid'], showgrid=True, zeroline=False),
-        legend=dict(font=dict(size=11), orientation='h', y=1.1),
-        height=300,
-        **CHART_LAYOUT
-    )
+def sc(df,ip,plrv):
+    fig=go.Figure()
+    fig.add_trace(go.Scatter(x=df['actual_price'],y=df['log_rating_count'],mode='markers',
+                              marker=dict(size=5,color=df['rating'],colorscale='Blues',opacity=0.4,
+                                         showscale=True,colorbar=dict(title='평점',thickness=9,len=0.75)),
+                              hovertemplate='가격: ₹%{x:,}<br>log(리뷰): %{y:.2f}<extra></extra>',name='전체 상품'))
+    fig.add_trace(go.Scatter(x=[ip],y=[plrv],mode='markers',
+                              marker=dict(size=18,symbol='star',color=C['r'],line=dict(color='white',width=2)),
+                              name='선택 상품',
+                              hovertemplate='선택 상품<br>가격: ₹%{x:,}<br>log(리뷰): %{y:.2f}<extra></extra>'))
+    fig.update_layout(title=dict(text='시장 내 상품 포지션',font=dict(size=13,color=C['t']),x=0,xanchor='left'),
+                      xaxis=dict(title='가격 (₹)',gridcolor=C['gr'],showgrid=True,zeroline=False),
+                      yaxis=dict(title='log(리뷰 수+1)',gridcolor=C['gr'],showgrid=True,zeroline=False),
+                      legend=dict(font=dict(size=10),orientation='h',y=1.14),
+                      height=290,**CL)
     return fig
+
+
+# =========================================================
+# 인라인 수치 테이블
+# =========================================================
+def kw_table_html(kdf):
+    mx=kdf['언급 횟수'].max() if len(kdf) else 1
+    rows=""
+    for _,r in kdf.iterrows():
+        p=int(r['언급 횟수']/mx*100)
+        rows+=f"""<tr>
+          <td style="font-weight:600;">{r['속성']}</td>
+          <td style="width:110px;"><div class="fbar-bg"><div class="fbar-fill" style="width:{p}%;"></div></div></td>
+          <td style="text-align:right;font-weight:700;color:#4F46E5;">{int(r['언급 횟수'])}회</td></tr>"""
+    return (f'<table class="ftable"><thead><tr><th>속성</th><th>비율</th><th>횟수</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table>')
+
+def absa_table_html(asum):
+    if asum.empty: return '<p style="color:#9CA3AF;font-size:0.82rem;">분석 결과 없음</p>'
+    pv=asum.pivot_table(index='속성',columns='감정',values='언급 횟수',aggfunc='sum',fill_value=0).reset_index()
+    for c in ['긍정','중립','부정']:
+        if c not in pv.columns: pv[c]=0
+    sty={'긍정':'background:#EEF2FF;color:#4F46E5;','중립':'background:#F3F4F6;color:#6B7280;',
+         '부정':'background:#FEF2F2;color:#EF4444;'}
+    rows=""
+    for _,r in pv.iterrows():
+        pills="".join(f'<span class="sp" style="{sty[s]}">{s} {int(r.get(s,0))}</span>'
+                      for s in ['긍정','중립','부정'] if int(r.get(s,0))>0)
+        rows+=f'<tr><td style="font-weight:600;">{r["속성"]}</td><td>{pills}</td></tr>'
+    return (f'<table class="ftable"><thead><tr><th>속성</th><th>긍정 / 중립 / 부정 (언급 수)</th></tr></thead>'
+            f'<tbody>{rows}</tbody></table>')
 
 
 # =========================================================
@@ -736,304 +639,350 @@ def scatter_chart(df, input_price, pred_log_rv):
 with st.spinner("데이터 로딩 중..."):
     df = load_and_preprocess()
 with st.spinner("AI 모델 준비 중 (최초 1회)..."):
-    model_r, model_rt, r2_review, r2_rating = train_models(df)
-    vectorizer, tfidf_matrix = build_tfidf(df)
+    mr, mrt, r2r, r2rt = train_models(df)
+    vec, tmat = build_tfidf(df)
 
 
 # =========================================================
 # 사이드바
 # =========================================================
 with st.sidebar:
-    # 로고
     st.markdown("""
-    <div class="sidebar-logo">
-        <div class="sidebar-logo-icon">🛒</div>
-        <div class="sidebar-logo-text">Seller Assistant</div>
+    <div class="sb-logo">
+      <div class="sb-logo-icon">📊</div>
+      <div>
+        <div class="sb-logo-name">AI 판매 전략 대시보드</div>
+        <div class="sb-logo-sub">Amazon Sales Analytics</div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
 
-    st.markdown('<div class="sidebar-section-label">상품 유형</div>', unsafe_allow_html=True)
-    product_type = st.radio("", ["판매 중 상품", "신상품 (직접 입력)"], label_visibility="collapsed")
+    st.markdown('<div class="sb-label">STEP 1 · 상품 유형 선택</div>', unsafe_allow_html=True)
+    ptype = st.radio("", ["판매 중 상품 선택", "신상품 직접 입력"], label_visibility="collapsed")
 
-    st.markdown('<div class="sidebar-section-label">상품 정보</div>', unsafe_allow_html=True)
+    st.markdown('<div class="sb-label">STEP 2 · 상품 정보 입력</div>', unsafe_allow_html=True)
 
-    if product_type == "판매 중 상품":
-        recommended_items = ["earbuds","headphones","keyboard","mouse","tablet",
-                             "speaker","charger","smartwatch","laptop","cable"]
-        sel_item  = st.selectbox("추천 검색어", recommended_items)
-        search_kw = st.text_input("직접 검색", sel_item)
+    if ptype == "판매 중 상품 선택":
+        rec = ["earbuds","headphones","keyboard","mouse","tablet",
+               "speaker","charger","smartwatch","laptop","cable"]
+        sel_item = st.selectbox("추천 검색어", rec)
+        skw = st.text_input("직접 검색", sel_item)
 
-        search_result = df[df['product_name'].str.contains(search_kw, case=False, na=False)].head(20).reset_index(drop=True)
-        options = [f"[{i+1}] {r['product_name'][:55]}" for i, r in search_result.iterrows()]
+        sv = vec.transform([skw])
+        ss = cosine_similarity(sv, tmat).flatten()
+        df['_ss'] = ss
+        nm = df[df['product_name'].str.contains(skw, case=False, na=False)]
+        sr = (nm.sort_values('_ss', ascending=False).head(20) if len(nm)>=3
+              else df.sort_values('_ss', ascending=False).head(20)).reset_index(drop=True)
 
-        if not options:
-            st.warning("검색 결과가 없습니다.")
-            st.stop()
+        opts = [f"[{i+1}] {r['product_name'][:52]}" for i,r in sr.iterrows()]
+        if not opts:
+            st.warning("검색 결과가 없습니다."); st.stop()
 
-        sel_opt = st.selectbox("분석 상품 선택", options)
-        sel_row = search_result.iloc[options.index(sel_opt)]
-
-        product_name      = sel_row['product_name']
-        main_category     = sel_row['main_category']
-        display_category  = sel_row['display_category']
-        actual_price      = float(sel_row['actual_price'])
-        price_level_input = sel_row['price_level']
-        about_product     = sel_row.get('about_product', '')
+        sel = st.selectbox("분석 상품 선택", opts)
+        row = sr.iloc[opts.index(sel)]
+        pname  = row['product_name']
+        mcat   = row['main_category']
+        dcat   = row['display_category']
+        price  = float(row['actual_price'])
+        pl     = row['price_level']
+        about  = str(row.get('about_product',''))
 
     else:
-        product_name  = st.text_input("상품명", "Wireless Headset")
-        about_product = st.text_input("설명 키워드", "bluetooth noise cancelling")
-        cat_list      = sorted(df['display_category'].dropna().unique())
-        display_category = st.selectbox("카테고리", cat_list)
-        main_category    = df.loc[df['display_category'] == display_category, 'main_category'].iloc[0]
-        actual_price     = st.number_input("예상 판매 가격 (₹)", min_value=0.0, value=5000.0)
-        prices = df.loc[df['main_category'] == main_category, 'actual_price']
-        q1, q2 = prices.quantile(0.33), prices.quantile(0.66)
-        price_level_input = 'Low' if actual_price <= q1 else ('Medium' if actual_price <= q2 else 'High')
+        pname = st.text_input("상품명", "Wireless Headset")
+        about = st.text_input("설명 키워드", "bluetooth noise cancelling")
+        cats  = sorted(df['display_category'].dropna().unique())
+        dcat  = st.selectbox("카테고리", cats)
+        mcat  = df.loc[df['display_category']==dcat,'main_category'].iloc[0]
+        price = st.number_input("예상 판매 가격 (₹)", min_value=0.0, value=5000.0)
+        ps    = df.loc[df['main_category']==mcat,'actual_price']
+        q1,q2 = ps.quantile(0.33), ps.quantile(0.66)
+        pl    = 'Low' if price<=q1 else ('Medium' if price<=q2 else 'High')
 
-    st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
-    analyze_button = st.button("분석 시작 →", use_container_width=True)
+    st.markdown('<div class="sb-label">STEP 3 · 분석 실행</div>', unsafe_allow_html=True)
+    go_btn = st.button("분석 시작 →", use_container_width=True)
 
-    # 모델 상태
-    st.markdown("<div style='height:16px'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
     st.markdown(f"""
-    <div style="display:flex; flex-direction:column; gap:6px;">
-        <div class="model-badge">✅ 리뷰 예측 모델 &nbsp; R² = {r2_review}</div>
-        <div class="model-badge">✅ 평점 예측 모델 &nbsp; R² = {r2_rating}</div>
-    </div>
-    """, unsafe_allow_html=True)
+    <div style="display:flex;flex-direction:column;gap:5px;">
+      <div class="mbadge">✅ 리뷰 예측 모델 R² = {r2r}</div>
+      <div class="mbadge">✅ 평점 예측 모델 R² = {r2rt}</div>
+    </div>""", unsafe_allow_html=True)
 
 
 # =========================================================
 # 메인 헤더
 # =========================================================
 st.markdown("""
-<div style="margin-bottom: 4px;">
-    <span style="font-size:0.75rem; font-weight:700; text-transform:uppercase;
-                 letter-spacing:1.2px; color:#9CA3AF;">Amazon Sales Analytics</span>
+<div class="page-header">
+  <div class="page-header-eyebrow">Amazon Sales Analytics</div>
+  <div class="page-header-title">AI 판매 전략 분석 대시보드</div>
+  <div class="page-header-sub">상품 데이터를 기반으로 최적 할인율과 소비자 반응 전략을 추천합니다.</div>
 </div>
 """, unsafe_allow_html=True)
-st.title("판매 전략 분석")
-st.markdown("""
-<p style="font-size:0.95rem; color:#6B7280; margin-top:-8px; margin-bottom:0;">
-AI 기반 할인율 시뮬레이션 · 소비자 반응 분석 · 최적 전략 추천
-</p>
-""", unsafe_allow_html=True)
-
-st.divider()
 
 
 # =========================================================
 # 대기 화면
 # =========================================================
-if not analyze_button:
+if not go_btn:
     st.markdown("""
-    <div class="card" style="padding: 48px 40px; text-align:center;">
-        <div style="font-size:2.8rem; margin-bottom:14px;">📊</div>
-        <div style="font-size:1.3rem; font-weight:800; color:#1A1D2E; margin-bottom:8px; letter-spacing:-0.4px;">
-            왼쪽에서 상품을 선택하세요
+    <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;
+                padding:52px 40px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+      <div style="font-size:2.6rem;margin-bottom:14px;">📊</div>
+      <div style="font-size:1.25rem;font-weight:800;color:#111827;margin-bottom:8px;letter-spacing:-0.4px;">
+        왼쪽 사이드바에서 상품을 선택하세요
+      </div>
+      <p style="font-size:0.88rem;color:#6B7280;line-height:1.7;max-width:400px;margin:0 auto 28px;">
+        판매 중인 상품 또는 신상품 정보를 입력한 뒤<br>
+        <b style="color:#4F46E5">분석 시작 →</b> 버튼을 누르면 AI 분석 결과가 나타납니다.
+      </p>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:680px;margin:0 auto;">
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🤖</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">AI 예측 모델</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">GradientBoosting 기반 평점·리뷰 수 예측</div>
         </div>
-        <p style="font-size:0.9rem; color:#6B7280; line-height:1.7; max-width:420px; margin:0 auto 28px;">
-            판매 중인 상품 또는 신상품 정보를 입력한 뒤<br>
-            <b style="color:#4F46E5">분석 시작 →</b> 버튼을 누르면 결과가 나타납니다.
-        </p>
-        <div class="feature-grid" style="max-width:700px; margin:0 auto;">
-            <div class="feature-item">
-                <div class="feature-item-icon">🤖</div>
-                <div class="feature-item-title">AI 예측 모델</div>
-                <div class="feature-item-desc">GradientBoosting 기반 평점·리뷰 수 예측</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item-icon">📉</div>
-                <div class="feature-item-title">할인율 시뮬레이션</div>
-                <div class="feature-item-desc">0~50% 구간별 최적 할인율 자동 계산</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item-icon">💬</div>
-                <div class="feature-item-title">ABSA 분석</div>
-                <div class="feature-item-desc">유사 상품 리뷰 속성별 감성 분석</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item-icon">🎯</div>
-                <div class="feature-item-title">전략 추천</div>
-                <div class="feature-item-desc">시장 데이터 기반 판매 전략 자동 생성</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item-icon">🔍</div>
-                <div class="feature-item-title">유사 상품 분석</div>
-                <div class="feature-item-desc">TF-IDF 기반 경쟁 상품 15개 탐색</div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-item-icon">📍</div>
-                <div class="feature-item-title">시장 포지션</div>
-                <div class="feature-item-desc">전체 시장 대비 가격·리뷰 위치 시각화</div>
-            </div>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">📉</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">할인율 시뮬레이션</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">0~50% 구간별 최적 할인율 자동 계산</div>
         </div>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">💬</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">리뷰 반응 분석</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">유사 상품 리뷰 속성별 감성 분석</div>
+        </div>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🎯</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">판매 전략 추천</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">시장 데이터 기반 최적 전략 자동 생성</div>
+        </div>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">🔍</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">유사 상품 분석</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">TF-IDF 기반 경쟁 상품 15개 탐색</div>
+        </div>
+        <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
+          <div style="font-size:1.4rem;margin-bottom:8px;">📍</div>
+          <div style="font-size:0.87rem;font-weight:700;color:#111827;margin-bottom:3px;">시장 포지션</div>
+          <div style="font-size:0.78rem;color:#6B7280;line-height:1.5;">전체 시장 대비 가격·리뷰 위치 시각화</div>
+        </div>
+      </div>
     </div>
     """, unsafe_allow_html=True)
     st.stop()
 
 
 # =========================================================
-# 분석 실행
+# 분석
 # =========================================================
 with st.spinner("AI 분석 중..."):
-    sim_df = simulate_discounts(model_r, model_rt, actual_price, main_category, price_level_input)
-    best   = sim_df.sort_values('추천점수', ascending=False).iloc[0]
+    sim  = simulate(mr, mrt, price, mcat, pl)
+    best = sim.sort_values('추천점수', ascending=False).iloc[0]
 
-    user_text = product_name + ' ' + about_product + ' ' + display_category
-    scores    = cosine_similarity(vectorizer.transform([user_text]), tfidf_matrix).flatten()
-    df['similarity_score'] = scores
-    similar   = df[df['product_name'] != product_name].sort_values('similarity_score', ascending=False).head(15).copy()
+    utxt  = pname+' '+about+' '+dcat
+    scos  = cosine_similarity(vec.transform([utxt]), tmat).flatten()
+    df['similarity_score'] = scos
+    sim15 = df[df['product_name']!=pname].sort_values('similarity_score', ascending=False).head(15).copy()
 
-    absa_raw     = run_absa(similar)
-    absa_summary = absa_raw.groupby(['속성','감정'])['언급 횟수'].sum().reset_index() if not absa_raw.empty else absa_raw
+    absa_raw  = run_absa(sim15)
+    absa_sum  = (absa_raw.groupby(['속성','감정'])['언급 횟수'].sum().reset_index()
+                 if not absa_raw.empty else absa_raw)
 
-    all_text = ' '.join((similar['review_title'].astype(str) + ' ' + similar['review_content'].astype(str)).tolist()).lower()
-    kw_df    = pd.DataFrame([[a, sum(all_text.count(k) for k in kws)] for a, kws in ASPECT_KEYWORDS.items()],
-                             columns=['속성','언급 횟수']).sort_values('언급 횟수', ascending=False)
-    top_aspect = kw_df.iloc[0]['속성']
+    at   = ' '.join((sim15['review_title'].astype(str)+' '+sim15['review_content'].astype(str)).tolist()).lower()
+    kwdf = pd.DataFrame([[a,sum(at.count(k) for k in kws)] for a,kws in AK.items()],
+                         columns=['속성','언급 횟수']).sort_values('언급 횟수', ascending=False)
+    top_asp = kwdf.iloc[0]['속성']
 
-    discount_strat_name, discount_strat_body = get_discount_strategy(int(best['할인율(%)']))
-    aspect_title, aspect_body = ASPECT_COMMENTS.get(top_aspect, (top_aspect, ''))
-
-    price_pct   = (df['actual_price'] < actual_price).mean() * 100
-    review_pct  = (df['rating_count'] < best['예상 리뷰 수']).mean() * 100
-    rating_pct  = (df['rating'] < best['예상 평점']).mean() * 100
-    competition = len(df[df['display_category'] == display_category])
+    dsn, dsb = discount_strat(int(best['할인율(%)']))
+    atn, atb = AC.get(top_asp, (top_asp,''))
+    pp  = (df['actual_price'] < price).mean()*100
+    rp  = (df['rating_count'] < best['예상 리뷰 수']).mean()*100
+    rtp = (df['rating'] < best['예상 평점']).mean()*100
+    comp= len(df[df['display_category']==dcat])
 
 
 # =========================================================
-# 결과 출력
+# ① 선택 상품 요약 카드
 # =========================================================
-
-# ── 분석 대상 카드
 st.markdown(f"""
-<div class="card">
-    <div class="section-label">분석 대상</div>
-    <div style="font-size:1.05rem; font-weight:700; color:#1A1D2E; margin-bottom:12px; line-height:1.4;">
-        {product_name[:100]}
-    </div>
-    <span class="tag">{display_category}</span>
-    <span class="tag">₹ {int(actual_price):,}</span>
-    <span class="tag-gray">가격대 {price_level_input}</span>
-    <span class="tag-gray">{product_type}</span>
+<div class="product-card">
+  <div class="product-card-name">{pname[:100]}</div>
+  <div class="product-meta">
+    <span class="tag">{dcat}</span>
+    <span class="tag">₹ {int(price):,}</span>
+    <span class="tag-g">가격대 {pl}</span>
+    <span class="tag-g">{ptype}</span>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
 
-# ── 핵심 메트릭
-st.markdown('<div class="page-section"><div class="page-section-icon">📊</div><div class="page-section-title">AI 예측 핵심 지표</div></div>', unsafe_allow_html=True)
+# =========================================================
+# ② 핵심 지표 — 추천 할인율 강조 + 3개 일반 카드
+# =========================================================
+st.markdown('<div class="sec-hdr"><div class="sec-hdr-icon">📊</div><div class="sec-hdr-title">핵심 결과</div></div>', unsafe_allow_html=True)
 
-m1, m2, m3, m4 = st.columns(4)
-m1.metric("추천 할인율",      f"{int(best['할인율(%)'])}%")
-m2.metric("예상 평점",         f"{best['예상 평점']:.2f} / 5.0")
-m3.metric("예상 리뷰 수",      f"{best['예상 리뷰 수']:,}개")
-m4.metric("시장 경쟁 상품",    f"{competition:,}개")
+c_hero, c2, c3, c4 = st.columns([1.4, 1, 1, 1])
 
-st.divider()
+with c_hero:
+    st.markdown(f"""
+    <div class="metric-hero">
+      <div class="metric-hero-label">추천 할인율</div>
+      <div class="metric-hero-value">{int(best['할인율(%)'])}%</div>
+      <div class="metric-hero-badge">{dsn}</div>
+    </div>
+    """, unsafe_allow_html=True)
 
-
-# ── 할인율 시뮬레이션 차트
-st.markdown('<div class="page-section"><div class="page-section-icon">📈</div><div class="page-section-title">할인율별 예측 시뮬레이션</div></div>', unsafe_allow_html=True)
-
-c1, c2 = st.columns(2)
-with c1:
-    st.plotly_chart(line_chart(sim_df['할인율(%)'], sim_df['예상 리뷰 수'],
-                               '할인율별 예상 리뷰 수', '할인율(%)', '예상 리뷰 수',
-                               best_x=int(best['할인율(%)']), fmt='int'),
-                    use_container_width=True)
 with c2:
-    st.plotly_chart(line_chart(sim_df['할인율(%)'], sim_df['예상 평점'],
-                               '할인율별 예상 평점', '할인율(%)', '예상 평점',
-                               best_x=int(best['할인율(%)'])),
-                    use_container_width=True)
+    st.markdown(f"""
+    <div class="metric-card">
+      <div class="metric-card-label">예상 평점</div>
+      <div class="metric-card-value">{best['예상 평점']:.1f}<span style="font-size:1rem;font-weight:500;color:#9CA3AF;"> / 5.0</span></div>
+    </div>
+    """, unsafe_allow_html=True)
 
-c3, c4 = st.columns(2)
 with c3:
-    st.plotly_chart(bar_score_chart(sim_df['할인율(%)'], sim_df['추천점수'], int(best['할인율(%)'])),
-                    use_container_width=True)
+    st.markdown(f"""
+    <div class="metric-card">
+      <div class="metric-card-label">예상 리뷰 수</div>
+      <div class="metric-card-value">{int(best['예상 리뷰 수']):,}<span style="font-size:1rem;font-weight:500;color:#9CA3AF;">개</span></div>
+    </div>
+    """, unsafe_allow_html=True)
+
 with c4:
-    st.plotly_chart(scatter_chart(df, actual_price, np.log1p(best['예상 리뷰 수'])),
-                    use_container_width=True)
+    st.markdown(f"""
+    <div class="metric-card">
+      <div class="metric-card-label">시장 경쟁 상품</div>
+      <div class="metric-card-value">{comp:,}<span style="font-size:1rem;font-weight:500;color:#9CA3AF;">개</span></div>
+    </div>
+    """, unsafe_allow_html=True)
+
+# 핵심 요약 문장
+st.markdown(f'<div class="summary-bar">{make_summary(best, sim)}</div>', unsafe_allow_html=True)
 
 st.divider()
 
 
-# ── ABSA
-st.markdown('<div class="page-section"><div class="page-section-icon">💬</div><div class="page-section-title">소비자 반응 분석 (ABSA)</div></div>', unsafe_allow_html=True)
+# =========================================================
+# ③ 할인율 시뮬레이션
+# =========================================================
+st.markdown('<div class="sec-hdr"><div class="sec-hdr-icon">📈</div><div class="sec-hdr-title">할인율별 예측 시뮬레이션</div></div>', unsafe_allow_html=True)
+
+col1, col2 = st.columns(2)
+with col1:
+    st.plotly_chart(lc(sim['할인율(%)'],sim['예상 리뷰 수'],'할인율별 예상 리뷰 수','할인율(%)','예상 리뷰 수',
+                       bx=int(best['할인율(%)']),fmt='int'), use_container_width=True, config=MB)
+    cls,msg = cc_review(sim,best)
+    st.markdown(f'<div class="{cls}">{msg}</div>', unsafe_allow_html=True)
+
+with col2:
+    st.plotly_chart(lc(sim['할인율(%)'],sim['예상 평점'],'할인율별 예상 평점','할인율(%)','예상 평점',
+                       bx=int(best['할인율(%)'])), use_container_width=True, config=MB)
+    cls,msg = cc_rating(sim,best)
+    st.markdown(f'<div class="{cls}">{msg}</div>', unsafe_allow_html=True)
+
+col3, col4 = st.columns(2)
+with col3:
+    st.plotly_chart(bc(sim['할인율(%)'],sim['추천점수'],int(best['할인율(%)'])),
+                    use_container_width=True, config=MB)
+    cls,msg = cc_score(best)
+    st.markdown(f'<div class="{cls}">{msg}</div>', unsafe_allow_html=True)
+
+with col4:
+    st.plotly_chart(sc(df, price, np.log1p(best['예상 리뷰 수'])),
+                    use_container_width=True, config=MB)
+    cls,msg = cc_scatter(pp,rp)
+    st.markdown(f'<div class="{cls}">{msg}</div>', unsafe_allow_html=True)
+
+st.divider()
+
+
+# =========================================================
+# ④ 소비자 리뷰 반응 분석 (ABSA → 판매자 친화 명칭)
+# =========================================================
+st.markdown('<div class="sec-hdr"><div class="sec-hdr-icon">💬</div><div class="sec-hdr-title">소비자 리뷰 반응 분석</div></div>', unsafe_allow_html=True)
 
 ca, cb = st.columns([3, 2])
 with ca:
-    fig_absa = absa_chart(absa_summary)
-    if fig_absa:
-        st.plotly_chart(fig_absa, use_container_width=True)
+    fig_a = ac(absa_sum)
+    if fig_a:
+        st.plotly_chart(fig_a, use_container_width=True, config=MB)
+        st.markdown(absa_table_html(absa_sum), unsafe_allow_html=True)
     else:
-        st.info("ABSA 분석에 충분한 리뷰 텍스트가 없습니다.")
+        st.info("분석에 충분한 리뷰 텍스트가 없습니다.")
+
 with cb:
-    st.plotly_chart(kw_chart(kw_df), use_container_width=True)
+    st.plotly_chart(kc(kwdf), use_container_width=True, config=MB)
+    st.markdown(kw_table_html(kwdf), unsafe_allow_html=True)
+
+# 리뷰 반응 한 줄 요약
+st.markdown(f'<div class="review-summary">{make_review_summary(top_asp, kwdf)}</div>', unsafe_allow_html=True)
 
 st.divider()
 
 
-# ── 전략 리포트
-st.markdown('<div class="page-section"><div class="page-section-icon">💡</div><div class="page-section-title">AI 판매 전략 리포트</div></div>', unsafe_allow_html=True)
+# =========================================================
+# ⑤ 최종 판매 전략 리포트
+# =========================================================
+st.markdown('<div class="sec-hdr"><div class="sec-hdr-icon">💡</div><div class="sec-hdr-title">최종 판매 전략 리포트</div></div>', unsafe_allow_html=True)
 
 s1, s2 = st.columns(2)
 with s1:
     st.markdown(f"""
-    <div class="card-highlight">
-        <div class="section-label">할인 전략</div>
-        <div class="strategy-title">📌 {int(best['할인율(%)'])}% · {discount_strat_name}</div>
-        <div class="strategy-body">{discount_strat_body}</div>
+    <div class="strat-card-blue">
+      <div class="strat-label">할인 전략</div>
+      <div class="strat-title">📌 {int(best['할인율(%)'])}% 할인 · {dsn}</div>
+      <div class="strat-body">{dsb}</div>
     </div>
     """, unsafe_allow_html=True)
 with s2:
     st.markdown(f"""
-    <div class="card-success">
-        <div class="section-label">소비자 소구 전략</div>
-        <div class="strategy-title">💬 {aspect_title}</div>
-        <div class="strategy-body">{aspect_body}</div>
+    <div class="strat-card-green">
+      <div class="strat-label">상세페이지 전략</div>
+      <div class="strat-title">🖊 {atn}</div>
+      <div class="strat-body">{atb}</div>
     </div>
     """, unsafe_allow_html=True)
 
 # 시장 포지션 수치
 st.markdown(f"""
-<div class="card">
-    <div class="section-label">시장 내 위치 분석</div>
-    <div style="display:flex; gap:48px; flex-wrap:wrap; margin-top:12px; margin-bottom:16px;">
-        <div>
-            <div class="big-number-label">가격 상위</div>
-            <div class="big-number">{price_pct:.1f}<span style="font-size:1.2rem; font-weight:600; color:#9CA3AF;">%</span></div>
-        </div>
-        <div>
-            <div class="big-number-label">예상 리뷰 상위</div>
-            <div class="big-number">{review_pct:.1f}<span style="font-size:1.2rem; font-weight:600; color:#9CA3AF;">%</span></div>
-        </div>
-        <div>
-            <div class="big-number-label">예상 평점 상위</div>
-            <div class="big-number">{rating_pct:.1f}<span style="font-size:1.2rem; font-weight:600; color:#9CA3AF;">%</span></div>
-        </div>
-    </div>
-    <div style="font-size:0.88rem; color:#6B7280; line-height:1.7; padding-top:12px; border-top:1px solid #F3F4F6;">
-        추천 할인율 <strong style="color:#4F46E5">{int(best['할인율(%)'])}%</strong> 적용 시
-        예상 평점 <strong style="color:#1A1D2E">{best['예상 평점']:.2f}점</strong>,
-        예상 리뷰 <strong style="color:#1A1D2E">{best['예상 리뷰 수']:,}개</strong>로 예측됩니다.
-        (추천점수 산정 기준: 평점 30% + 리뷰 수 30% + 매출 지표 40%)
-    </div>
+<div style="background:#fff;border:1px solid #E5E7EB;border-radius:12px;
+            padding:20px 24px;margin-top:12px;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
+  <div style="font-size:0.65rem;font-weight:700;text-transform:uppercase;
+              letter-spacing:1.2px;color:#9CA3AF;margin-bottom:14px;">시장 내 위치 분석</div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;margin-bottom:14px;">
+    <div><div class="pos-lbl">가격 상위</div>
+         <div class="pos-num">{pp:.1f}<span style="font-size:1.1rem;font-weight:600;color:#9CA3AF;">%</span></div></div>
+    <div><div class="pos-lbl">예상 리뷰 상위</div>
+         <div class="pos-num">{rp:.1f}<span style="font-size:1.1rem;font-weight:600;color:#9CA3AF;">%</span></div></div>
+    <div><div class="pos-lbl">예상 평점 상위</div>
+         <div class="pos-num">{rtp:.1f}<span style="font-size:1.1rem;font-weight:600;color:#9CA3AF;">%</span></div></div>
+  </div>
+  <div style="font-size:0.84rem;color:#6B7280;line-height:1.7;
+              padding-top:12px;border-top:1px solid #F3F4F6;">
+    추천 할인율 <strong style="color:#4F46E5">{int(best['할인율(%)'])}%</strong> 적용 시
+    예상 평점 <strong style="color:#111827">{best['예상 평점']:.1f}점</strong>,
+    예상 리뷰 <strong style="color:#111827">{int(best['예상 리뷰 수']):,}개</strong>로 예측됩니다.
+    <span style="color:#9CA3AF;">(추천점수 산정: 평점 30% + 리뷰 수 30% + 매출 지표 40%)</span>
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
 st.divider()
 
 
-# ── 부록
-with st.expander("🔍 유사 상품 TOP 15"):
-    show = similar[['product_name','display_category','actual_price',
-                    'discount_percentage','rating','rating_count','similarity_score']].copy()
+# =========================================================
+# ⑥ 유사 상품 상세표 (접어두기)
+# =========================================================
+with st.expander("🔍 유사 상품 TOP 15 보기"):
+    show = sim15[['product_name','display_category','actual_price',
+                  'discount_percentage','rating','rating_count','similarity_score']].copy()
     show.columns = ['상품명','카테고리','가격','할인율(%)','평점','리뷰 수','유사도']
     st.dataframe(show.reset_index(drop=True), use_container_width=True)
 
 with st.expander("📋 할인율별 전체 시뮬레이션 테이블"):
-    st.dataframe(sim_df[['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수','추천점수']].reset_index(drop=True),
-                 use_container_width=True)
+    disp = sim[['할인율(%)','할인 후 가격','예상 평점','예상 리뷰 수','추천점수']].copy()
+    disp['예상 리뷰 수'] = disp['예상 리뷰 수'].astype(int)
+    st.dataframe(disp.reset_index(drop=True), use_container_width=True)
