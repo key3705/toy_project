@@ -55,7 +55,8 @@ Cosine Similarity 계산       평점 예측 / 리뷰 수 예측
                ▼
     Streamlit 웹 서비스 (SellMate 대시보드)
 ```
-![Uploading image.png…]
+<img width="1513" height="909" alt="image" src="https://github.com/user-attachments/assets/c8972a2e-ad5b-4350-b468-4d17c307a22b" />
+
 
 ---
 
