@@ -38,7 +38,7 @@ st.markdown("""
     color: #111827;
 }
 .block-container {
-    padding-top: 2rem;
+    padding-top: 2.8rem;
     padding-left: 2.6rem;
     padding-right: 2.6rem;
     max-width: 1440px;
@@ -117,7 +117,7 @@ section[data-testid="stSidebar"] .stButton button:hover {
 }
 
 /* ── 헤더 */
-.page-header { padding-bottom: 18px; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
+.page-header { padding-top: 0.5rem; padding-bottom: 18px; border-bottom: 1px solid #E5E7EB; margin-bottom: 20px; }
 .page-header-eyebrow {
     font-size: 0.7rem; font-weight: 700; text-transform: uppercase;
     letter-spacing: 1.4px; color: #9CA3AF; margin-bottom: 4px;
@@ -285,6 +285,13 @@ section[data-testid="stSidebar"] .stButton button:hover {
 }
 
 
+
+/* ── selectbox 직접 입력 비활성화 */
+section[data-testid="stSidebar"] .stSelectbox [data-baseweb="select"] input {
+    pointer-events: none !important;
+    caret-color: transparent !important;
+    user-select: none !important;
+}
 
 /* ── misc */
 [data-testid="stDataFrame"] { border-radius:10px; overflow:hidden; border:1px solid #E5E7EB !important; }
@@ -684,20 +691,8 @@ with st.sidebar:
         rec = ["earbuds","headphones","keyboard","mouse","tablet",
                "speaker","charger","smartwatch","laptop","cable"]
 
-        # 추천 검색어 selectbox (빠른 선택)
-        sel_item = st.selectbox(
-            "추천 검색어",
-            rec,
-            help="자주 찾는 검색어를 선택하면 아래 검색창에 자동 입력됩니다."
-        )
-
-        # 직접 검색 (자유 입력) — selectbox 선택값이 기본값
-        skw = st.text_input(
-            "🔍 직접 검색",
-            value=sel_item,
-            placeholder="상품명을 영어로 입력하세요",
-            help="직접 입력하면 더 정확한 검색이 가능합니다."
-        )
+        # 추천 검색어 selectbox
+        skw = st.selectbox("추천 검색어", rec, index=0)
 
         sv = vec.transform([skw])
         ss = cosine_similarity(sv, tmat).flatten()
@@ -731,7 +726,7 @@ with st.sidebar:
         pl    = 'Low' if price<=q1 else ('Medium' if price<=q2 else 'High')
 
     st.markdown('<div class="sb-label">STEP 3 · 분석 실행</div>', unsafe_allow_html=True)
-    go_btn = st.button("분석 시작 →", use_container_width=True)
+    go_btn = st.button("분석 시작", use_container_width=True)
 
     st.markdown("<div style='height:14px'></div>", unsafe_allow_html=True)
     st.markdown(f"""
@@ -783,7 +778,7 @@ if not go_btn:
       </div>
       <p style="font-size:0.88rem;color:#6B7280;line-height:1.7;max-width:400px;margin:0 auto 28px;">
         판매 중인 상품 또는 신상품 정보를 입력한 뒤<br>
-        <b style="color:#4F46E5">분석 시작 →</b> 버튼을 누르면 AI 분석 결과가 나타납니다.
+        <b style="color:#4F46E5">분석 시작</b> 버튼을 누르면 AI 분석 결과가 나타납니다.
       </p>
       <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:680px;margin:0 auto;">
         <div style="background:#F9FAFB;border:1px solid #E5E7EB;border-radius:10px;padding:18px;text-align:left;">
