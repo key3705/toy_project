@@ -18,8 +18,8 @@ from sklearn.metrics.pairwise import cosine_similarity
 # 페이지 설정
 # =========================================================
 st.set_page_config(
-    page_title="AI 판매 전략 대시보드",
-    page_icon="📊",
+    page_title="SellMate · AI 판매 전략 대시보드",
+    page_icon="🤝",
     layout="wide",
     initial_sidebar_state="expanded"
 )
@@ -67,8 +67,11 @@ section[data-testid="stSidebar"] * { color: #111827 !important; }
     display: flex; align-items: center; justify-content: center;
     font-size: 17px;
 }
-.sb-logo-name  { font-size: 0.98rem; font-weight: 800; letter-spacing: -0.3px; }
-.sb-logo-sub   { font-size: 0.7rem;  color: #9CA3AF !important; margin-top: 1px; }
+.sb-logo-name {
+    font-size: 1.1rem; font-weight: 800; letter-spacing: -0.5px; color: #111827 !important;
+}
+.sb-logo-name span { color: #4F46E5; }
+.sb-logo-sub { font-size: 0.7rem; color: #9CA3AF !important; margin-top: 2px; letter-spacing: 0.2px; }
 .sb-label {
     font-size: 0.65rem; font-weight: 700;
     text-transform: uppercase; letter-spacing: 1.3px;
@@ -267,6 +270,41 @@ section[data-testid="stSidebar"] .stButton button:hover {
 .mbadge { display:inline-flex; align-items:center; gap:5px;
           background:#F0FDF4; border:1px solid #BBF7D0; border-radius:7px;
           padding:4px 10px; font-size:0.75rem; font-weight:600; color:#065F46; }
+
+/* ── 추천 검색어 칩 버튼 */
+section[data-testid="stSidebar"] .stButton button {
+    background: linear-gradient(135deg, #4F46E5, #7C3AED) !important;
+    color: #fff !important; border-radius: 10px !important; border: none !important;
+    font-size: 0.92rem !important; font-weight: 700 !important;
+    padding: 12px 18px !important; width: 100%;
+    box-shadow: 0 3px 12px rgba(79,70,229,0.32) !important;
+    transition: all 0.18s !important; margin-top: 4px;
+}
+section[data-testid="stSidebar"] .stButton button:hover {
+    box-shadow: 0 5px 18px rgba(79,70,229,0.42) !important;
+    transform: translateY(-1px);
+}
+
+/* 추천 검색어 칩 — 작은 버튼 스타일 (분석 시작 버튼과 구분) */
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] .stButton button {
+    background: #F3F4F6 !important;
+    color: #374151 !important;
+    border-radius: 8px !important;
+    border: 1.5px solid #E5E7EB !important;
+    font-size: 0.78rem !important;
+    font-weight: 600 !important;
+    padding: 5px 4px !important;
+    box-shadow: none !important;
+    margin-top: 0 !important;
+    transition: all 0.12s !important;
+}
+section[data-testid="stSidebar"] [data-testid="stHorizontalBlock"] .stButton button:hover {
+    background: #EEF2FF !important;
+    color: #4F46E5 !important;
+    border-color: #C7D2FE !important;
+    transform: none !important;
+    box-shadow: none !important;
+}
 
 /* ── misc */
 [data-testid="stDataFrame"] { border-radius:10px; overflow:hidden; border:1px solid #E5E7EB !important; }
@@ -649,10 +687,10 @@ with st.spinner("AI 모델 준비 중 (최초 1회)..."):
 with st.sidebar:
     st.markdown("""
     <div class="sb-logo">
-      <div class="sb-logo-icon">📊</div>
+      <div class="sb-logo-icon">🤝</div>
       <div>
-        <div class="sb-logo-name">AI 판매 전략 대시보드</div>
-        <div class="sb-logo-sub">Amazon Sales Analytics</div>
+        <div class="sb-logo-name">Sell<span>Mate</span></div>
+        <div class="sb-logo-sub">판매자의 AI 파트너</div>
       </div>
     </div>
     """, unsafe_allow_html=True)
@@ -665,8 +703,23 @@ with st.sidebar:
     if ptype == "판매 중 상품 선택":
         rec = ["earbuds","headphones","keyboard","mouse","tablet",
                "speaker","charger","smartwatch","laptop","cable"]
-        sel_item = st.selectbox("추천 검색어", rec)
-        skw = st.text_input("직접 검색", sel_item)
+
+        # 추천 검색어 칩 UI
+        st.markdown('<div style="font-size:0.72rem;font-weight:700;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px;margin-bottom:6px;">추천 검색어</div>', unsafe_allow_html=True)
+        chip_cols = st.columns(5)
+        chip_clicked = None
+        for ci, chip in enumerate(rec):
+            if chip_cols[ci % 5].button(chip, key=f"chip_{chip}", use_container_width=True):
+                chip_clicked = chip
+
+        # 검색어 상태 관리
+        if chip_clicked:
+            st.session_state["skw"] = chip_clicked
+        if "skw" not in st.session_state:
+            st.session_state["skw"] = "earbuds"
+
+        skw = st.text_input("🔍 상품 검색", value=st.session_state["skw"], key="search_input")
+        st.session_state["skw"] = skw
 
         sv = vec.transform([skw])
         ss = cosine_similarity(sv, tmat).flatten()
@@ -715,9 +768,19 @@ with st.sidebar:
 # =========================================================
 st.markdown("""
 <div class="page-header">
-  <div class="page-header-eyebrow">Amazon Sales Analytics</div>
-  <div class="page-header-title">AI 판매 전략 분석 대시보드</div>
-  <div class="page-header-sub">상품 데이터를 기반으로 최적 할인율과 소비자 반응 전략을 추천합니다.</div>
+  <div style="display:flex; align-items:center; gap:10px; margin-bottom:6px;">
+    <div style="font-size:1.55rem; font-weight:900; color:#111827; letter-spacing:-1px; line-height:1;">
+      Sell<span style="color:#4F46E5;">Mate</span>
+    </div>
+    <div style="background:#EEF2FF; color:#4F46E5; border-radius:6px; padding:3px 10px;
+                font-size:0.72rem; font-weight:700; letter-spacing:0.5px;">
+      AI 판매 전략 대시보드
+    </div>
+  </div>
+  <div class="page-header-sub">
+    판매자의 AI 파트너 · 상품 데이터를 기반으로 <b style="color:#111827;">최적 할인율</b>과
+    <b style="color:#111827;">소비자 반응 전략</b>을 자동으로 추천합니다.
+  </div>
 </div>
 """, unsafe_allow_html=True)
 
@@ -729,8 +792,15 @@ if not go_btn:
     st.markdown("""
     <div style="background:#fff;border:1px solid #E5E7EB;border-radius:14px;
                 padding:52px 40px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.04);">
-      <div style="font-size:2.6rem;margin-bottom:14px;">📊</div>
-      <div style="font-size:1.25rem;font-weight:800;color:#111827;margin-bottom:8px;letter-spacing:-0.4px;">
+      <div style="font-size:2.8rem;font-weight:900;color:#111827;letter-spacing:-2px;margin-bottom:6px;">
+        Sell<span style="color:#4F46E5;">Mate</span>
+      </div>
+      <div style="font-size:0.82rem;color:#9CA3AF;letter-spacing:0.5px;margin-bottom:20px;">
+        판매자의 AI 파트너
+      </div>
+      <div style="width:48px;height:2px;background:linear-gradient(90deg,#4F46E5,#7C3AED);
+                  border-radius:2px;margin:0 auto 24px;"></div>
+      <div style="font-size:1.1rem;font-weight:700;color:#111827;margin-bottom:8px;letter-spacing:-0.3px;">
         왼쪽 사이드바에서 상품을 선택하세요
       </div>
       <p style="font-size:0.88rem;color:#6B7280;line-height:1.7;max-width:400px;margin:0 auto 28px;">
